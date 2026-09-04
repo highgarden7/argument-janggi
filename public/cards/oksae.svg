@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="148" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="159" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="151" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="none" stroke="#B0302A" stroke-width="8" filter="url(#carveHard)"/><rect x="24" y="24" width="192" height="192" rx="2" fill="none" stroke="#B0302A" stroke-width="1.8" opacity=".5" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.72) translate(-50,-50)" filter="url(#carve)"><g>
+      <rect x="30" y="16" width="40" height="26" rx="3" fill="#B0302A"/>
+      <rect x="38" y="6" width="24" height="12" rx="5" fill="#B0302A"/>
+      <g stroke="#EFE8D8" stroke-width="2.4" fill="none"><path d="M38 24 h24 M38 33 h24"/></g>
+      <path d="M50 46 v10 M43 51 l7 7 l7 -7" stroke="#B0302A" stroke-width="3.6" fill="none"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <g opacity=".4"><g transform="translate(26,76)"><path d="M -5.8,-14.0 L 5.8,-14.0 L 14.0,-5.8 L 14.0,5.8 L 5.8,14.0 L -5.8,14.0 L -14.0,5.8 L -14.0,-5.8 Z" fill="#EFE8D8" stroke="#B0302A" stroke-width="1.5"/></g><g transform="translate(26,76) scale(0.01564,-0.01564) translate(-499.5,-377.0)" fill="#B0302A" filter="url(#carve)"><path d="M158 224C162 161 120 106 82 84C49 69 25 39 37 1C51 -39 100 -50 136 -29C189 2 226 94 171 225ZM285 223 273 220C285 163 288 87 273 22C346 -75 475 88 285 223ZM419 229 409 223C438 176 465 105 464 45C551 -34 654 143 419 229ZM561 245 552 238C592 205 637 148 649 98C744 41 811 227 561 245ZM294 734H461V614H294ZM177 763V231H198C258 231 294 258 294 266V289H808C795 149 772 56 746 35C736 28 727 26 711 26C688 26 615 31 570 35V21C614 13 652 0 670 -18C686 -34 690 -57 690 -88C752 -88 793 -80 826 -56C879 -18 908 86 924 270C945 272 957 279 965 287L860 375L799 317H577V437H838C852 437 863 442 866 453C823 490 753 541 753 541L692 465H577V586H837C852 586 862 591 865 602C823 638 753 689 753 689L692 614H577V734H863C877 734 889 739 892 750C847 788 774 842 774 842L710 763H308L177 812ZM294 586H461V465H294ZM294 437H461V317H294Z"/></g></g>
+      <path d="M42 76 h12 M48 69 l9 7 l-9 7" stroke="#B0302A" stroke-width="3.6"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <g><g transform="translate(74,76)"><path d="M -6.6,-16.0 L 6.6,-16.0 L 16.0,-6.6 L 16.0,6.6 L 6.6,16.0 L -6.6,16.0 L -16.0,6.6 L -16.0,-6.6 Z" fill="#EFE8D8" stroke="#B0302A" stroke-width="1.8"/></g><g transform="translate(74,76) scale(0.01787,-0.01787) translate(-499.5,-377.0)" fill="#B0302A" filter="url(#carve)"><path d="M158 224C162 161 120 106 82 84C49 69 25 39 37 1C51 -39 100 -50 136 -29C189 2 226 94 171 225ZM285 223 273 220C285 163 288 87 273 22C346 -75 475 88 285 223ZM419 229 409 223C438 176 465 105 464 45C551 -34 654 143 419 229ZM561 245 552 238C592 205 637 148 649 98C744 41 811 227 561 245ZM294 734H461V614H294ZM177 763V231H198C258 231 294 258 294 266V289H808C795 149 772 56 746 35C736 28 727 26 711 26C688 26 615 31 570 35V21C614 13 652 0 670 -18C686 -34 690 -57 690 -88C752 -88 793 -80 826 -56C879 -18 908 86 924 270C945 272 957 279 965 287L860 375L799 317H577V437H838C852 437 863 442 866 453C823 490 753 541 753 541L692 465H577V586H837C852 586 862 591 865 602C823 638 753 689 753 689L692 614H577V734H863C877 734 889 739 892 750C847 788 774 842 774 842L710 763H308L177 812ZM294 586H461V465H294ZM294 437H461V317H294Z"/></g></g>
+    </g></g>
+</svg>

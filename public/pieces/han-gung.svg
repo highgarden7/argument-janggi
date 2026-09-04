@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="han gung">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="5" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="16" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -19.0,-46.0 L 19.0,-46.0 L 46.0,-19.0 L 46.0,19.0 L 19.0,46.0 L -19.0,46.0 L -46.0,19.0 L -46.0,-19.0 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -19.0,-46.0 L 19.0,-46.0 L 46.0,-19.0 L 46.0,19.0 L 19.0,46.0 L -19.0,46.0 L -46.0,19.0 L -46.0,-19.0 Z" fill="#EDE4CD" stroke="#8A2420" stroke-width="2.4"/><path d="M -16.4,-39.5 L 16.4,-39.5 L 39.5,-16.4 L 39.5,16.4 L 16.4,39.5 L -16.4,39.5 L -39.5,16.4 L -39.5,-16.4 Z" fill="none" stroke="#B0302A" stroke-width="1.3" opacity=".75" filter="url(#carve)"/></g><g transform="translate(50.0,50.0) scale(0.04622,-0.04622) translate(-503.0,-379.5)" fill="#B0302A" filter="url(#carve)"><path d="M82 211C71 211 36 211 36 211V192C57 190 74 186 88 176C112 160 116 67 98 -38C105 -75 128 -90 151 -90C199 -90 232 -57 234 -6C237 82 197 119 195 172C194 197 202 233 210 267C224 320 294 545 333 667L318 672C134 269 134 269 112 232C101 212 96 211 82 211ZM86 837 78 831C114 794 157 735 171 682C276 617 357 816 86 837ZM35 616 27 610C60 574 94 518 100 466C197 395 290 583 35 616ZM673 849V743H546V809C573 813 580 823 583 837L442 849V743H290L298 714H442V602H462C502 602 546 613 546 620H553V549H449L339 592V318H354C396 318 443 340 443 350V374H553V333L552 286H322L330 258H550C547 228 541 199 533 172H283L291 144H523C485 55 404 -16 242 -77L248 -88C485 -40 589 42 634 144H652C698 29 773 -43 895 -85C905 -26 935 12 978 25L979 35C862 45 745 81 679 144H941C955 144 966 149 969 160C927 196 858 248 858 249L798 172H644C653 199 659 228 662 258H900C913 258 924 263 926 274C898 298 859 328 838 344C866 350 895 361 896 366V506C913 510 925 517 931 524L824 602L775 549H665V620H673V607H693C735 607 780 618 780 624V714H946C960 714 969 719 972 730C936 765 876 814 876 814L823 743H780V809C806 813 814 823 816 837ZM809 340 765 286H664L665 335V374H785V340H804ZM785 403H665V521H785ZM553 403H443V521H553ZM553 648H546V714H673V648Z"/></g>
+</svg>

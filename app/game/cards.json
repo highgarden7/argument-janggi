@@ -1,0 +1,784 @@
+﻿[
+    {
+        "id":  "gwal-sang",
+        "name":  "활상",
+        "hanja":  "闊象",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "sang",
+        "cost":  1.5,
+        "draw":  "OWN_SANG",
+        "text":  "내 상을 활상으로 바꿉니다. 활상은 멱 2곳 중 1곳이 막혀도 통과합니다."
+    },
+    {
+        "id":  "yugyeok-jol",
+        "name":  "유격졸",
+        "hanja":  "遊擊卒",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "jol",
+        "cost":  1.5,
+        "draw":  "OWN_JOL_1",
+        "text":  "내 졸·병을 유격졸로 바꿉니다. 유격졸은 뒤로 1칸 이동할 수 있습니다."
+    },
+    {
+        "id":  "howi-musa",
+        "name":  "호위무사",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "sa",
+        "cost":  1.5,
+        "draw":  "OWN_SA",
+        "text":  "내 사를 호위무사로 바꿉니다. 호위무사는 기존 1칸 행마를 유지하며 궁성 밖으로 나갈 수 있습니다."
+    },
+    {
+        "id":  "jeoncha",
+        "name":  "전차",
+        "hanja":  "戰車",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "cha",
+        "cost":  2.0,
+        "draw":  "OWN_CHA",
+        "text":  "내 차를 전차로 바꿉니다. 전차는 차 행마에 더해 대각선으로 1칸 이동할 수 있습니다."
+    },
+    {
+        "id":  "cheonma",
+        "name":  "천마",
+        "hanja":  "天馬",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "ma",
+        "cost":  2.5,
+        "draw":  "OWN_MA",
+        "text":  "내 마를 천마로 바꿉니다. 천마는 멱을 무시합니다."
+    },
+    {
+        "id":  "jungpo",
+        "name":  "중포",
+        "hanja":  "重砲",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "po",
+        "cost":  3.0,
+        "draw":  "OWN_PO",
+        "text":  "내 포를 중포로 바꿉니다. 중포는 포다리를 2개까지 넘을 수 있지만 3개 이상은 넘을 수 없습니다."
+    },
+    {
+        "id":  "gongseongtap",
+        "name":  "공성탑",
+        "hanja":  "攻城塔",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "cha",
+        "cost":  3.0,
+        "draw":  "OWN_CHA_ALLIES_2",
+        "text":  "내 차를 공성탑으로 바꿉니다. 공성탑은 내구가 2이고 한 번에 최대 2칸 움직입니다. 아군 기물 하나가 자신의 행마로 공성탑에 타거나, 공성탑이 아군에게 이동해 태울 수 있습니다. 공성탑을 움직이면 탑승 기물이 함께 이동하고, 탑승 기물을 직접 움직이면 그 기물이 자신의 행마로 내려 이동합니다. 공성탑이 부서지면 탑승 기물은 그 자리에 살아남습니다."
+    },
+    {
+        "id":  "geobukseon",
+        "name":  "거북선",
+        "hanja":  "龜船",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "cha",
+        "cost":  4.0,
+        "draw":  "OWN_CHA",
+        "text":  "내 차를 거북선으로 바꿉니다. 거북선은 내구가 2이고 직선으로 이동하며 지나친 모든 상대 기물을 잡습니다. 상대 기물을 잡거나 공격받을 때마다 내구가 1 줄고, 0이 되면 침몰합니다."
+    },
+    {
+        "id":  "miljeong",
+        "name":  "밀정",
+        "hanja":  "密偵",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "cha",
+        "cost":  4.0,
+        "draw":  "OWN_CHA",
+        "text":  "내 차를 밀정으로 바꿉니다. 밀정은 상대에게 위치가 보이지 않으며, 기물을 잡는 순간 정체가 드러나고 이후 일반 차가 됩니다."
+    },
+    {
+        "id":  "hwacha",
+        "name":  "화차",
+        "hanja":  "火車",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "po",
+        "cost":  3.5,
+        "draw":  "OWN_PO",
+        "text":  "내 포를 화차로 바꿉니다. 화차가 포다리를 넘어 착지하면 착지 칸 상하좌우의 상대 졸·병을 함께 태웁니다."
+    },
+    {
+        "id":  "hongipo",
+        "name":  "홍이포",
+        "hanja":  "紅夷砲",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "po",
+        "cost":  4.0,
+        "draw":  "OWN_PO",
+        "text":  "내 포를 홍이포로 바꿉니다. 홍이포는 포다리 없이 직선 이동하며 착지 칸과 그 너머 한 칸의 상대 기물을 관통해 함께 제거합니다. 3번 발사하면 파열되어 사라집니다."
+    },
+    {
+        "id":  "dokkaebi",
+        "name":  "도깨비",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "ma",
+        "cost":  3.5,
+        "draw":  "OWN_MA",
+        "text":  "내 마를 도깨비로 바꿉니다. 도깨비는 이동 직후 상대의 다음 한 수 동안 판에서 사라지고 그 칸은 빈 칸으로 취급됩니다. 상대 수가 끝나면 돌아오며, 돌아올 자리에 상대 기물이 있으면 그 기물을 잡습니다."
+    },
+    {
+        "id":  "jeoktoma",
+        "name":  "적토마",
+        "hanja":  "赤兎馬",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "ma",
+        "cost":  4.0,
+        "draw":  "OWN_MA",
+        "text":  "내 마를 적토마로 바꿉니다. 적토마는 상대 기물을 잡을 때마다 기존 행마를 유지하면서 직선 구간이 한 칸 더 긴 행마를 추가합니다(최대 2회). 멱이 막히면 마와 같이 해당 방향으로 움직일 수 없으며, 늘어난 직선 경로도 모두 비어 있어야 합니다."
+    },
+    {
+        "id":  "mudang",
+        "name":  "무당",
+        "hanja":  "巫堂",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "sang",
+        "cost":  3.5,
+        "draw":  "OWN_SANG",
+        "text":  "내 상을 무당으로 바꿉니다. 무당은 상의 행마 그대로 움직입니다. 매 상대 턴 동안 무당의 상 행마 사정권 안에 있는 상대 기물은 모두 움직이지 못합니다. 멱이 막힌 방향은 사정권에 들어가지 않으며, 얼어 있는 기물도 잡을 수 있습니다."
+    },
+    {
+        "id":  "horangi",
+        "name":  "굶주린 호랑이",
+        "hanja":  "虎",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "sang",
+        "cost":  4.0,
+        "draw":  "OWN_SANG",
+        "text":  "내 상을 굶주린 호랑이로 바꿉니다. 굶주린 호랑이는 멱 없이 대각선으로 거리 제한 없이 이동하지만, 이동한 턴에는 반드시 기물을 잡아야 합니다. 잡지 못하면 그 수는 무효가 되어 제자리로 돌아옵니다."
+    },
+    {
+        "id":  "gwangdae",
+        "name":  "광대",
+        "hanja":  "廣大",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "jol",
+        "cost":  3.5,
+        "draw":  "OWN_JOL_1",
+        "text":  "내 졸·병을 광대로 바꿉니다. 광대는 인접한 아군 기물의 행마를 복사해 이동하며, 인접한 아군이 없으면 일반 졸·병처럼 움직입니다."
+    },
+    {
+        "id":  "uibyeong",
+        "name":  "의병",
+        "hanja":  "義兵",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "jol",
+        "cost":  3.0,
+        "draw":  "OWN_JOL_1",
+        "text":  "내 졸·병을 의병으로 바꿉니다. 내 턴에 ‘한 턴 쉬기’를 사용하면 즉시 제자리에서 한 턴 쉬고 성장합니다(최대 3회). 1회 후퇴 추가, 2회 전방 대각선 이동 추가, 3회 차 행마로 변경됩니다."
+    },
+    {
+        "id":  "jangdolbaengi",
+        "name":  "장돌뱅이",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "jol",
+        "cost":  4.5,
+        "draw":  "OWN_JOL_1",
+        "text":  "내 졸·병을 장돌뱅이로 바꿉니다. 장돌뱅이는 잡은 상대 기물을 봇짐에 최대 2개까지 보관합니다. 내 턴에 잡은 기물 하나를 골라 내 기물로 내 궁성 안 빈칸에 놓을 수 있습니다. 장돌뱅이가 잡히면 봇짐도 함께 사라집니다."
+    },
+    {
+        "id":  "naesi",
+        "name":  "내시",
+        "hanja":  "內侍",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "sa",
+        "cost":  3.5,
+        "draw":  "OWN_SA",
+        "text":  "내 사를 내시로 바꿉니다. 내시는 내 궁이 이동할 때 함께 따라 이동하며, 궁이 잡힐 상황이면 한 번 대신 잡힙니다."
+    },
+    {
+        "id":  "guksa",
+        "name":  "국사",
+        "hanja":  "國師",
+        "category":  "TRANSFORM",
+        "activation":  "ACTIVE",
+        "basePiece":  "sa",
+        "cost":  4.0,
+        "draw":  "OWN_SA_PALACE_EMPTY",
+        "text":  "내 사를 국사로 바꿉니다. 국사가 궁성 안에 5수 동안 머물면 잡힌 내 기물 하나를 궁성 빈칸에 한 번 되살립니다."
+    },
+    {
+        "id":  "jingbyeong",
+        "name":  "징병",
+        "hanja":  "徵兵",
+        "category":  "PROMOTION",
+        "activation":  "ACTIVE",
+        "cost":  1.5,
+        "draw":  "OWN_JOL_1",
+        "text":  "1회, 내 졸·병 1개를 그 자리에서 상으로 승격시킨다."
+    },
+    {
+        "id":  "gaebyeong",
+        "name":  "개병",
+        "hanja":  "改兵",
+        "category":  "PROMOTION",
+        "activation":  "PASSIVE",
+        "cost":  3.5,
+        "draw":  "OWN_JOL_ADJACENT_ENEMY",
+        "text":  "1회, 내 졸·병이 상대 기물을 잡으면 그 기물로 변신한다. 차·궁 제외."
+    },
+    {
+        "id":  "seungjin",
+        "name":  "승진",
+        "hanja":  "昇進",
+        "category":  "PROMOTION",
+        "activation":  "PASSIVE",
+        "cost":  4.0,
+        "draw":  "OWN_JOL_1",
+        "text":  "내 졸·병이 상대 끝줄에 도달하면 궁을 제외한 원하는 기물로 승격한다."
+    },
+    {
+        "id":  "jayu-pojin",
+        "name":  "자유포진",
+        "category":  "OPENING",
+        "activation":  "ON_START",
+        "cost":  1.0,
+        "draw":  "OPENING_SLOT",
+        "text":  "내 마·상 포진을 상대 포진을 전부 본 뒤에 결정한다."
+    },
+    {
+        "id":  "jeungwonbyeong",
+        "name":  "증원병",
+        "hanja":  "增援兵",
+        "category":  "OPENING",
+        "activation":  "ON_START",
+        "cost":  2.0,
+        "draw":  "OPENING_SLOT",
+        "text":  "시작 시 졸·병 1개를 내 진영 3~4선 빈칸에 추가 배치한다."
+    },
+    {
+        "id":  "gibyeongdae",
+        "name":  "기병대",
+        "hanja":  "騎兵隊",
+        "category":  "OPENING",
+        "activation":  "ON_START",
+        "cost":  2.5,
+        "draw":  "OPENING_SLOT",
+        "text":  "시작 시 내 상 2개를 마로 바꿔 시작한다. 마 4개."
+    },
+    {
+        "id":  "eorinjin",
+        "name":  "어린진",
+        "hanja":  "魚鱗陣",
+        "category":  "OPENING",
+        "activation":  "PASSIVE",
+        "cost":  2.5,
+        "draw":  "OPENING_SLOT",
+        "text":  "가로로 인접한 내 졸·병 3개 이상은 상대에게 잡히지 않는다. 인접이 끊기면 즉시 해제된다."
+    },
+    {
+        "id":  "yeonhwanpo",
+        "name":  "연환포",
+        "hanja":  "連環包",
+        "category":  "OPENING",
+        "activation":  "PASSIVE",
+        "cost":  2.5,
+        "draw":  "OPENING_SLOT",
+        "text":  "내 포는 아군 포를 포다리로 쓸 수 있다."
+    },
+    {
+        "id":  "sangatap",
+        "name":  "상아탑",
+        "hanja":  "象牙塔",
+        "category":  "OPENING",
+        "activation":  "ON_START",
+        "cost":  3.0,
+        "draw":  "OPENING_SLOT",
+        "text":  "시작 시 내 마 2개를 상으로 바꿔 시작한다(상 4개). 내 모든 상은 멱을 무시한다."
+    },
+    {
+        "id":  "chapo-ttegi",
+        "name":  "차포떼기",
+        "category":  "OPENING",
+        "activation":  "ON_START",
+        "cost":  4.5,
+        "draw":  "OPENING_SLOT",
+        "exclusive":  [
+                          "dogang"
+                      ],
+        "text":  "시작 시 내 차 1개와 포 1개를 스스로 제거한다. 대신 남은 내 모든 기물은 멱과 포다리 제약을 무시한다."
+    },
+    {
+        "id":  "jaribakkum",
+        "name":  "자리바꿈",
+        "category":  "ACTIVE",
+        "activation":  "ACTIVE",
+        "cost":  2.0,
+        "draw":  "OWN_NONKING_2TYPES",
+        "text":  "1회, 내 기물 2개의 위치를 맞바꾼다. 서로 다른 종류여야 한다."
+    },
+    {
+        "id":  "eunsin",
+        "name":  "은신",
+        "hanja":  "隱身",
+        "category":  "ACTIVE",
+        "activation":  "ACTIVE",
+        "cost":  2.0,
+        "draw":  "ANY",
+        "text":  "1회, 내 기물 1개가 다음 상대 턴 동안 잡히지 않는다."
+    },
+    {
+        "id":  "bangbyeok",
+        "name":  "방벽",
+        "hanja":  "防壁",
+        "category":  "ACTIVE",
+        "activation":  "ACTIVE",
+        "cost":  2.0,
+        "draw":  "ANY",
+        "text":  "1회, 빈 교차점 1곳을 3턴간 아무도 지나갈 수 없는 벽으로 만든다."
+    },
+    {
+        "id":  "maesu",
+        "name":  "매수",
+        "hanja":  "買收",
+        "category":  "ACTIVE",
+        "activation":  "ACTIVE",
+        "cost":  2.5,
+        "draw":  "ENEMY_JOL_ADJACENT",
+        "text":  "1회, 내 기물과 인접한 상대 졸·병 1개를 내 편으로 전향시킨다."
+    },
+    {
+        "id":  "gyeolbak",
+        "name":  "결박",
+        "hanja":  "結縛",
+        "category":  "ACTIVE",
+        "activation":  "ACTIVE",
+        "cost":  3.0,
+        "draw":  "ENEMY_NONKING",
+        "text":  "1회, 상대 기물 1개를 지정해 상대의 다음 2턴간 움직이지 못하게 한다."
+    },
+    {
+        "id":  "sungan-idong",
+        "name":  "순간이동",
+        "category":  "ACTIVE",
+        "activation":  "ACTIVE",
+        "cost":  3.5,
+        "draw":  "ANY",
+        "text":  "1회, 내 기물 1개를 판 위 아무 빈칸으로 옮긴다."
+    },
+    {
+        "id":  "buhwal",
+        "name":  "부활",
+        "hanja":  "復活",
+        "category":  "ACTIVE",
+        "activation":  "ACTIVE",
+        "cost":  4.0,
+        "draw":  "ANY",
+        "text":  "1회, 잡힌 내 기물 1개를 내 궁성 또는 내 진영 빈칸에 되살린다. 차도 가능."
+    },
+    {
+        "id":  "chulgung",
+        "name":  "출궁",
+        "hanja":  "出宮",
+        "category":  "PALACE",
+        "activation":  "PASSIVE",
+        "cost":  1.5,
+        "draw":  "ANY",
+        "exclusive":  [
+                          "suryeom-cheongjeong"
+                      ],
+        "text":  "내 사가 전부 잡히면 내 궁이 궁성 밖으로 나갈 수 있다. 1칸 행마는 그대로."
+    },
+    {
+        "id":  "daeyeok",
+        "name":  "대역",
+        "hanja":  "代役",
+        "category":  "PALACE",
+        "activation":  "ACTIVE",
+        "cost":  2.0,
+        "draw":  "OWN_SA",
+        "text":  "1회, 내 턴에 내 궁과 내 사 1개의 위치를 즉시 맞바꾼다."
+    },
+    {
+        "id":  "bonghwa",
+        "name":  "봉화",
+        "hanja":  "烽火",
+        "category":  "PALACE",
+        "activation":  "ACTIVE",
+        "cost":  2.0,
+        "draw":  "ANY",
+        "text":  "게임 중 1회, 내 궁을 궁성 안 아무 빈칸으로 즉시 이동시킨다."
+    },
+    {
+        "id":  "gwang-gungseong",
+        "name":  "광궁성",
+        "hanja":  "廣宮城",
+        "category":  "PALACE",
+        "activation":  "PASSIVE",
+        "cost":  2.5,
+        "draw":  "ANY",
+        "text":  "내 궁성이 4×4로 확장되고 대각선도 그에 맞춰 연장된다."
+    },
+    {
+        "id":  "seongbyeok",
+        "name":  "성벽",
+        "hanja":  "城壁",
+        "category":  "PALACE",
+        "activation":  "ACTIVE",
+        "cost":  3.0,
+        "draw":  "ANY",
+        "text":  "내 궁성 3×3의 한 변 바깥에 성벽을 세운다. 궁성 밖에서는 성벽을 넘어 들어올 수 없지만, 궁성 안에서는 밖으로 나갈 수 있다. 차·포의 직선 경로도 막힌다. 바깥쪽 변에는 지정할 수 없다."
+    },
+    {
+        "id":  "hamjeong",
+        "name":  "함정",
+        "hanja":  "陷穽",
+        "category":  "PALACE",
+        "activation":  "ACTIVE",
+        "cost":  3.0,
+        "draw":  "ANY",
+        "text":  "게임 중 1회, 내 궁성 3×3 안의 빈 칸 하나에 함정을 설치한다. 그 칸에 들어온 상대 기물은 즉시 제거된다."
+    },
+    {
+        "id":  "cheondo",
+        "name":  "천도",
+        "hanja":  "遷都",
+        "category":  "PALACE",
+        "activation":  "ACTIVE",
+        "cost":  3.0,
+        "draw":  "MY_TERRITORY_EMPTY",
+        "text":  "1회, 내 턴에 내 궁을 내 진영(1~5선) 아무 빈칸으로 옮긴다."
+    },
+    {
+        "id":  "eorim",
+        "name":  "어림",
+        "hanja":  "御臨",
+        "category":  "PALACE",
+        "activation":  "PASSIVE",
+        "cost":  3.5,
+        "draw":  "ANY",
+        "text":  "내 궁이 궁성 밖으로 나갈 수 있다. 1칸 행마는 그대로. 내 궁이 상대 진영 끝줄에 도달하면 즉시 승리한다."
+    },
+    {
+        "id":  "wangcha-haengma",
+        "name":  "왕차행마",
+        "category":  "PALACE",
+        "activation":  "PASSIVE",
+        "cost":  3.5,
+        "draw":  "ANY",
+        "text":  "내 궁과 사가 궁성 안에서 차와 동일한 행마를 얻는다. 궁성 밖으로는 나갈 수 없다."
+    },
+    {
+        "id":  "eogeom",
+        "name":  "어검",
+        "hanja":  "御劍",
+        "category":  "PALACE",
+        "activation":  "PASSIVE",
+        "cost":  4.0,
+        "draw":  "ANY",
+        "text":  "내 궁이 직접 기물을 잡으면, 그 궁이 한 번 더 이동할 수 있다."
+    },
+    {
+        "id":  "oksae",
+        "name":  "옥새",
+        "hanja":  "玉璽",
+        "category":  "PALACE",
+        "activation":  "PASSIVE",
+        "cost":  4.0,
+        "draw":  "PALACE_EMPTY",
+        "text":  "내 궁이 상대 기물을 잡으면 그 기물이 내 편이 되어 내 궁성 빈칸에 놓인다."
+    },
+    {
+        "id":  "okjwa",
+        "name":  "옥좌",
+        "hanja":  "玉座",
+        "category":  "PALACE",
+        "activation":  "PASSIVE",
+        "cost":  4.0,
+        "draw":  "ANY",
+        "text":  "내 궁이 한 번도 이동하지 않은 동안, 내 모든 기물은 잡힐 때 상대 기물 하나를 함께 데려간다(각 기물 1회). 궁이 한 번이라도 움직이면 영구 해제된다."
+    },
+    {
+        "id":  "suryeom-cheongjeong",
+        "name":  "수렴청정",
+        "hanja":  "垂簾聽政",
+        "category":  "PALACE",
+        "activation":  "PASSIVE",
+        "cost":  5.0,
+        "draw":  "OWN_SA_2",
+        "exclusive":  [
+                          "yeokseong-hyeokmyeong",
+                          "chulgung"
+                      ],
+        "text":  "획득 즉시 내 궁이 궁성 밖으로 나갈 수 있다. 내 궁이 잡혀도 패배하지 않는다. 대신 내 사가 모두 잡히면 패배한다."
+    },
+    {
+        "id":  "seongmun",
+        "name":  "성문",
+        "hanja":  "城門",
+        "category":  "PALACE",
+        "activation":  "ACTIVE",
+        "cost":  5.0,
+        "draw":  "ANY",
+        "text":  "내 궁성 3×3의 한 변을 성문으로 지정한다. 상대 기물은 성문을 통해서만 내 궁성에 들어올 수 있다. 바깥쪽 변에는 지정할 수 없다."
+    },
+    {
+        "id":  "yeokseong-hyeokmyeong",
+        "name":  "역성혁명",
+        "hanja":  "易姓革命",
+        "category":  "PALACE",
+        "activation":  "PASSIVE",
+        "cost":  5.0,
+        "draw":  "OWN_NONKING_1",
+        "exclusive":  [
+                          "suryeom-cheongjeong"
+                      ],
+        "text":  "내 궁이 잡히는 바로 그 순간 발동한다. 판 위의 내 기물 중 원하는 것 하나를 골라 왕관을 씌운다. 그 기물이 새 왕이 되며, 원래 행마를 유지한다. 왕관 기물이 잡히면 패배한다."
+    },
+    {
+        "id":  "hunsukkun",
+        "name":  "훈수꾼",
+        "category":  "ANOMALY",
+        "activation":  "ACTIVE",
+        "cost":  2.5,
+        "draw":  "OPENING_SLOT",
+        "text":  "사용 시 내 기물 1개(궁 제외)를 판에서 내려 대기시킨다. 이후 언제든 내 턴에 그 기물을 내 진영 빈칸에 투입할 수 있다."
+    },
+    {
+        "id":  "yeokmacha",
+        "name":  "역마차",
+        "hanja":  "驛馬車",
+        "category":  "ANOMALY",
+        "activation":  "PASSIVE",
+        "cost":  2.5,
+        "draw":  "OWN_MA_AND_JOL",
+        "text":  "내 졸·병이 내 마 위에 올라탈 수 있습니다(같은 칸에 겹침). 겹친 동안 마를 움직이면 마 행마로 함께 이동하고, 언제든 졸·병을 직접 움직여 졸·병 행마로 내릴 수 있습니다. 겹친 채 잡히면 둘 다 잡힙니다."
+    },
+    {
+        "id":  "myosupuri",
+        "name":  "묘수풀이",
+        "hanja":  "妙手",
+        "category":  "ANOMALY",
+        "activation":  "ACTIVE",
+        "cost":  3.0,
+        "draw":  "OWN_NONKING_3",
+        "text":  "1회, 내 기물 3개의 이동 순서를 미리 선언한다. 상대의 응수와 무관하게 3턴에 걸쳐 그대로 실행된다. 중간에 그 기물이 잡히면 중단."
+    },
+    {
+        "id":  "sindaeryuk",
+        "name":  "신대륙 발견",
+        "category":  "ANOMALY",
+        "activation":  "ACTIVE",
+        "cost":  3.5,
+        "draw":  "OWN_PO",
+        "text":  "내 포 하나를 비숍으로 바꿉니다. 비숍은 대각선으로 거리 제한 없이 이동하며 포다리가 필요 없습니다."
+    },
+    {
+        "id":  "dogang",
+        "name":  "도강",
+        "hanja":  "渡江",
+        "category":  "ANOMALY",
+        "activation":  "PASSIVE",
+        "cost":  3.5,
+        "draw":  "ANY",
+        "exclusive":  [
+                          "chapo-ttegi"
+                      ],
+        "text":  "내 기물이 강을 건너 상대 진영으로 넘어가면 다시 강을 건너 돌아올 수 없다. 대신 강 건너의 내 마·상은 멱을 무시한다."
+    },
+    {
+        "id":  "powi",
+        "name":  "포위",
+        "hanja":  "包圍",
+        "category":  "ANOMALY",
+        "activation":  "PASSIVE",
+        "cost":  3.5,
+        "draw":  "OWN_PIECES_4",
+        "text":  "상대 기물 하나의 상하좌우 중 3면 이상이 내 기물 또는 판 가장자리로 막히면, 그 기물이 내 편이 된다."
+    },
+    {
+        "id":  "yeokjeon",
+        "name":  "역전",
+        "hanja":  "易轉",
+        "category":  "ANOMALY",
+        "activation":  "ACTIVE",
+        "cost":  3.5,
+        "draw":  "ANY",
+        "text":  "1회, 판 전체를 180도 회전시킨다. 모든 기물의 위치가 뒤집히고, 졸·병의 진행 방향은 각자 원래대로 유지된다."
+    },
+    {
+        "id":  "hangu",
+        "name":  "항우",
+        "hanja":  "項羽",
+        "category":  "ANOMALY",
+        "activation":  "PASSIVE",
+        "cost":  4.0,
+        "draw":  "ANY",
+        "exclusive":  [
+                          "yubang"
+                      ],
+        "text":  "내 궁을 항우로 바꿉니다. 항우는 궁성 선을 무시하고 8방향으로 1칸 이동하며 궁성 안팎을 자유롭게 오갑니다. 변신한 직후에도 궁성 안의 상대 기물을 잡을 수 있습니다. 상대 진영 끝줄에 도달하면 즉시 승리합니다."
+    },
+    {
+        "id":  "yubang",
+        "name":  "유방",
+        "hanja":  "劉邦",
+        "category":  "ANOMALY",
+        "activation":  "ACTIVE",
+        "cost":  4.0,
+        "draw":  "ANY",
+        "exclusive":  [
+                          "hangu"
+                      ],
+        "text":  "내 궁을 유방으로 바꿉니다. 유방은 궁성 안에서 원래 선을 따라 움직이고, 궁성 밖에서는 상하좌우로 1칸 이동합니다. 유방이 떠난 교차점에는 상대의 통과를 막는 적기(赤氣)가 최대 3개 남습니다. 상대는 적기 위 기물을 잡아 그 칸에 들어갈 수 있으며, 내 기물은 적기를 자유롭게 이용합니다. 상대 진영 끝줄에 도달하면 즉시 승리합니다."
+    },
+    {
+        "id":  "amhaeng-eosa",
+        "name":  "암행어사",
+        "hanja":  "暗行御史",
+        "category":  "ANOMALY",
+        "activation":  "ACTIVE",
+        "cost":  4.0,
+        "draw":  "OWN_JOL_1",
+        "text":  "은닉. 내 졸·병 1개를 비밀리에 지정한다. 그 졸이 상대 끝줄에 도달하면 즉시 승리한다."
+    },
+    {
+        "id":  "gyeolgak",
+        "name":  "결각",
+        "hanja":  "蹩脚",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  2.5,
+        "draw":  "ENEMY_MA",
+        "duration":  "상대 4수",
+        "text":  "상대 마는 역방향 멱도 비어 있어야 이동할 수 있다. 멱이 1곳에서 2곳으로 늘어난다."
+    },
+    {
+        "id":  "geumjok",
+        "name":  "금족",
+        "hanja":  "禁足",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  2.5,
+        "draw":  "ANY",
+        "duration":  "상대 4수",
+        "text":  "상대 궁과 사는 궁성 대각선을 사용할 수 없다. 직선 이동만 가능하다."
+    },
+    {
+        "id":  "yeonmak",
+        "name":  "연막",
+        "hanja":  "煙幕",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  3.0,
+        "draw":  "ENEMY_PO",
+        "duration":  "상대 4수",
+        "text":  "상대 포는 포다리가 2개 있어야 이동·포획할 수 있다. 1개만 있으면 불가."
+    },
+    {
+        "id":  "chadan",
+        "name":  "차단",
+        "hanja":  "遮斷",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  3.0,
+        "draw":  "ENEMY_CHA",
+        "duration":  "상대 5수",
+        "text":  "상대 차는 한 번에 최대 4칸까지만 이동할 수 있다."
+    },
+    {
+        "id":  "busang",
+        "name":  "부상",
+        "hanja":  "負傷",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  3.0,
+        "draw":  "ENEMY_MA_OR_SANG",
+        "duration":  "영구",
+        "text":  "상대 마 또는 상 1개를 절름발이로 만든다. 한 번 이동하면 다음 상대 턴에는 움직일 수 없다."
+    },
+    {
+        "id":  "sucha",
+        "name":  "수차",
+        "hanja":  "銹車",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  3.5,
+        "draw":  "ENEMY_CHA",
+        "duration":  "영구",
+        "text":  "상대 차 1개를 녹슨 차로 만든다. 같은 방향으로 연속 두 번 이동할 수 없다."
+    },
+    {
+        "id":  "talyeong",
+        "name":  "탈영",
+        "hanja":  "脫營",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  2.5,
+        "draw":  "ENEMY_JOL",
+        "duration":  "영구",
+        "text":  "상대 졸·병 1개를 탈영병으로 만든다. 상대는 평소대로 조종할 수 있지만, 상대의 매 턴이 끝날 때마다 자기 진영 방향으로 1칸 자동 후퇴한다. 자기 끝줄에 닿으면 사라진다."
+    },
+    {
+        "id":  "yeokbyeong",
+        "name":  "역병",
+        "hanja":  "疫病",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  3.5,
+        "draw":  "ENEMY_JOL",
+        "duration":  "영구",
+        "text":  "전염. 상대 졸·병 1개가 병에 걸린다. 병든 졸은 전진만 가능하며 잡을 때만 좌우로 갈 수 있다. 매 3수마다 인접한 상대 졸에게 옮는다 — 상한 없음."
+    },
+    {
+        "id":  "gullyeong",
+        "name":  "군령",
+        "hanja":  "軍令",
+        "category":  "RESTRICT",
+        "activation":  "PASSIVE",
+        "cost":  3.0,
+        "draw":  "ANY",
+        "text":  "상대는 직전에 움직인 기물과 같은 종류를 연속으로 움직일 수 없다."
+    },
+    {
+        "id":  "jingbal",
+        "name":  "징발",
+        "hanja":  "徵發",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  2.0,
+        "draw":  "ENEMY_JOL",
+        "duration":  "상대 1수",
+        "text":  "상대의 다음 한 수는 반드시 졸·병을 움직여야 한다. 움직일 졸이 없으면 그 수는 자유."
+    },
+    {
+        "id":  "injil",
+        "name":  "인질",
+        "hanja":  "人質",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  3.5,
+        "draw":  "ENEMY_NONKING",
+        "duration":  "상대 4수",
+        "text":  "상대 기물 1개를 지정한다. 그 기물은 반드시 내 궁 방향으로 이동해야 한다. 가능한 이동이 있는 한."
+    },
+    {
+        "id":  "homyeong",
+        "name":  "호명",
+        "hanja":  "呼名",
+        "category":  "RESTRICT",
+        "activation":  "ACTIVE",
+        "cost":  3.0,
+        "draw":  "ENEMY_NONKING",
+        "text":  "내 턴에 상대 기물 하나를 지목한다. 상대의 다음 수는 반드시 그 기물을 움직여야 한다. 게임 중 1회."
+    }
+]

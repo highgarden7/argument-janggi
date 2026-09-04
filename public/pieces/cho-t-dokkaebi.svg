@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="cho 도깨비">
+  <title>도깨비 · ma 변신</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#EDE4CD" stroke="#124A2A" stroke-width="2.4"/><path d="M -15.9,-38.5 L 15.9,-38.5 L 38.5,-15.9 L 38.5,15.9 L 15.9,38.5 L -15.9,38.5 L -38.5,15.9 L -38.5,-15.9 Z" fill="none" stroke="#1D6B3F" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -14.5,-35.0 L 14.5,-35.0 L 35.0,-14.5 L 35.0,14.5 L 14.5,35.0 L -14.5,35.0 L -35.0,14.5 L -35.0,-14.5 Z" fill="none" stroke="#1D6B3F" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50,50) scale(.70) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M28 34 q-6 -14 -2 -22 q8 5 11 16 Z" fill="#1D6B3F"/>
+      <path d="M72 34 q6 -14 2 -22 q-8 5 -11 16 Z" fill="#1D6B3F"/>
+      <path d="M50 24 q24 0 27 23 q3 23 -6 35 q-8 10 -21 10 t-21 -10 q-9 -12 -6 -35 q3 -23 27 -23 Z" fill="#1D6B3F"/>
+      <ellipse cx="38" cy="46" rx="8" ry="9" fill="#EDE4CD"/><ellipse cx="62" cy="46" rx="8" ry="9" fill="#EDE4CD"/>
+      <circle cx="39" cy="47" r="3.6" fill="#1D6B3F"/><circle cx="61" cy="47" r="3.6" fill="#1D6B3F"/>
+      <path d="M33 65 q17 10 34 0 q-3 12 -17 12 t-17 -12 Z" fill="#EDE4CD"/>
+      <path d="M39 67 l3 7 l3 -7 Z M55 67 l3 7 l3 -7 Z" fill="#1D6B3F"/>
+    </g></g>
+</svg>

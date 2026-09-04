@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="25" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="36" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="28" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="none" stroke="#B0302A" stroke-width="8" filter="url(#carveHard)"/><rect x="24" y="24" width="192" height="192" rx="2" fill="none" stroke="#B0302A" stroke-width="1.8" opacity=".5" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.62) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M32 30 q-3 -18 3 -24 q9 6 11 20 Z" fill="#B0302A"/>
+      <path d="M68 30 q3 -18 -3 -24 q-9 6 -11 20 Z" fill="#B0302A"/>
+      <path d="M50 20 q17 0 20 16 l3 18 q1 10 -5 16 l-4 16 q-2 8 -14 8 t-14 -8 l-4 -16
+               q-6 -6 -5 -16 l3 -18 q3 -16 20 -16 Z" fill="#B0302A"/>
+      <path d="M50 16 q-9 4 -12 14 q-6 -12 2 -18 q4 6 10 4 Z" fill="#B0302A"/>
+      <ellipse cx="34" cy="44" rx="5" ry="6.5" fill="#EFE8D8"/>
+      <ellipse cx="66" cy="44" rx="5" ry="6.5" fill="#EFE8D8"/>
+      <circle cx="34.5" cy="45" r="2.4" fill="#B0302A"/><circle cx="65.5" cy="45" r="2.4" fill="#B0302A"/>
+      <path d="M44 60 h12" stroke="#EFE8D8" stroke-width="2.6" stroke-linecap="round"/>
+      <ellipse cx="44" cy="76" rx="3.4" ry="4.6" fill="#EFE8D8"/>
+      <ellipse cx="56" cy="76" rx="3.4" ry="4.6" fill="#EFE8D8"/>
+      <g fill="#B0302A" opacity=".55">
+        <circle cx="24" cy="80" r="3"/><circle cx="16" cy="72" r="2.1"/>
+        <circle cx="76" cy="80" r="3"/><circle cx="84" cy="72" r="2.1"/>
+      </g>
+    </g></g>
+</svg>

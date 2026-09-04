@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="154" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="165" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="157" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="none" stroke="#B0302A" stroke-width="8" filter="url(#carveHard)"/><rect x="24" y="24" width="192" height="192" rx="2" fill="none" stroke="#B0302A" stroke-width="1.8" opacity=".5" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.72) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M6 8 h88" stroke="#B0302A" stroke-width="5" stroke-linecap="round"/>
+      <line x1="12" y1="12.0" x2="88" y2="12.0" stroke="#B0302A" stroke-width="3.4"/><line x1="12" y1="19.5" x2="88" y2="19.5" stroke="#B0302A" stroke-width="3.4"/><line x1="12" y1="27.0" x2="88" y2="27.0" stroke="#B0302A" stroke-width="3.4"/><line x1="12" y1="34.5" x2="88" y2="34.5" stroke="#B0302A" stroke-width="3.4"/><line x1="12" y1="42.0" x2="88" y2="42.0" stroke="#B0302A" stroke-width="3.4"/><line x1="12" y1="49.5" x2="88" y2="49.5" stroke="#B0302A" stroke-width="3.4"/>
+      <circle cx="50" cy="60" r="9" fill="#B0302A"/>
+      <path d="M50 70 q-12 0 -14 13 q-1 6 0 9 h28 q1 -3 0 -9 q-2 -13 -14 -13 Z" fill="#B0302A"/>
+      <g><g transform="translate(18,78)"><path d="M -4.6,-11.0 L 4.6,-11.0 L 11.0,-4.6 L 11.0,4.6 L 4.6,11.0 L -4.6,11.0 L -11.0,4.6 L -11.0,-4.6 Z" fill="#EFE8D8" stroke="#B0302A" stroke-width="1.2"/></g><g transform="translate(18,78) scale(0.01234,-0.01234) translate(-500.5,-398.5)" fill="#B0302A" filter="url(#carve)"><path d="M92 -8 100 -37H888C903 -37 914 -32 917 -21C868 22 786 84 786 84L714 -8H563V453H935C950 453 961 458 964 469C916 511 834 572 834 572L763 481H563V790C590 794 597 804 600 818L434 834V481H37L46 453H434V-8Z"/></g><g transform="translate(82,78)"><path d="M -4.6,-11.0 L 4.6,-11.0 L 11.0,-4.6 L 11.0,4.6 L 4.6,11.0 L -4.6,11.0 L -11.0,4.6 L -11.0,-4.6 Z" fill="#EFE8D8" stroke="#B0302A" stroke-width="1.2"/></g><g transform="translate(82,78) scale(0.01234,-0.01234) translate(-500.5,-398.5)" fill="#B0302A" filter="url(#carve)"><path d="M92 -8 100 -37H888C903 -37 914 -32 917 -21C868 22 786 84 786 84L714 -8H563V453H935C950 453 961 458 964 469C916 511 834 572 834 572L763 481H563V790C590 794 597 804 600 818L434 834V481H37L46 453H434V-8Z"/></g></g>
+    </g></g>
+</svg>

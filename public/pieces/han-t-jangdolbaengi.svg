@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="han 장돌뱅이">
+  <title>장돌뱅이 · jol 변신</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#EDE4CD" stroke="#8A2420" stroke-width="2.4"/><path d="M -15.9,-38.5 L 15.9,-38.5 L 38.5,-15.9 L 38.5,15.9 L 15.9,38.5 L -15.9,38.5 L -38.5,15.9 L -38.5,-15.9 Z" fill="none" stroke="#B0302A" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -14.5,-35.0 L 14.5,-35.0 L 35.0,-14.5 L 35.0,14.5 L 14.5,35.0 L -14.5,35.0 L -35.0,14.5 L -35.0,-14.5 Z" fill="none" stroke="#B0302A" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50,50) scale(.70) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M60 46 q22 -4 26 14 q3 18 -8 26 q-14 4 -22 -6 q-6 -18 4 -34 Z" fill="#B0302A"/>
+      <path d="M60 50 q14 22 4 34" stroke="#EDE4CD" stroke-width="2.4" fill="none"/>
+      <path d="M66 44 q6 -8 14 -2 q-6 2 -8 6 Z" fill="#B0302A"/>
+      <circle cx="42" cy="26" r="9" fill="#B0302A"/>
+      <path d="M32 22 q10 -6 20 0 q-10 3 -20 0 Z" fill="#B0302A"/>
+      <path d="M36 36 q8 -4 14 0 q6 14 4 26 l-4 24 h-8 l-2 -22 l-6 20 h-8 q4 -30 10 -48 Z" fill="#B0302A"/>
+      <path d="M36 44 L22 60" stroke="#B0302A" stroke-width="4" stroke-linecap="round"/>
+      <path d="M22 30 v54" stroke="#B0302A" stroke-width="3.4" stroke-linecap="round"/>
+    </g></g><g class="pips"><circle cx="46.1" cy="79" r="1.9" fill="none" stroke="#B0302A" stroke-width="1.1" opacity=".55"/><circle cx="53.9" cy="79" r="1.9" fill="none" stroke="#B0302A" stroke-width="1.1" opacity=".55"/></g>
+</svg>

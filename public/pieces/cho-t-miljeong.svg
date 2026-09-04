@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="cho 밀정">
+  <title>밀정 · cha 변신</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#EDE4CD" stroke="#124A2A" stroke-width="2.4"/><path d="M -15.9,-38.5 L 15.9,-38.5 L 38.5,-15.9 L 38.5,15.9 L 15.9,38.5 L -15.9,38.5 L -38.5,15.9 L -38.5,-15.9 Z" fill="none" stroke="#1D6B3F" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -14.5,-35.0 L 14.5,-35.0 L 35.0,-14.5 L 35.0,14.5 L 14.5,35.0 L -14.5,35.0 L -35.0,14.5 L -35.0,-14.5 Z" fill="none" stroke="#1D6B3F" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50,50) scale(.70) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M46 60 q4 -6 8 0 q10 4 12 16 q1 8 -2 12 H36 q-3 -4 -2 -12 q2 -12 12 -16 Z" fill="#1D6B3F"/>
+      <path d="M34 44 q0 22 16 22 t16 -22 Z" fill="#1D6B3F"/>
+      <rect x="10" y="38" width="80" height="7" rx="3.5" fill="#1D6B3F"/>
+      <ellipse cx="50" cy="38" rx="40" ry="5" fill="#1D6B3F"/>
+      <path d="M38 36 q0 -20 12 -20 t12 20 Z" fill="#1D6B3F"/>
+      <path d="M40 50 q5 -5 11 -1 q-6 5 -11 1 Z" fill="#EDE4CD"/>
+      <path d="M60 50 q-5 -5 -11 -1 q6 5 11 1 Z" fill="#EDE4CD"/>
+      <circle cx="45" cy="49" r="2.2" fill="#1D6B3F"/><circle cx="55" cy="49" r="2.2" fill="#1D6B3F"/>
+      <path d="M42 30 h16" stroke="#EDE4CD" stroke-width="2.6" stroke-linecap="round"/>
+    </g></g>
+</svg>

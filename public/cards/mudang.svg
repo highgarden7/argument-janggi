@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="28" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="39" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="31" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="none" stroke="#B0302A" stroke-width="8" filter="url(#carveHard)"/><rect x="24" y="24" width="192" height="192" rx="2" fill="none" stroke="#B0302A" stroke-width="1.8" opacity=".5" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.62) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M50 8 l12 22 H38 Z" fill="#B0302A"/>
+      <path d="M43 30 h14 v4 H43 Z" fill="#B0302A"/>
+      <circle cx="50" cy="42" r="8.5" fill="#B0302A"/>
+      <path d="M41 52 q9 -4 18 0 q7 18 5 36 H36 q-2 -18 5 -36 Z" fill="#B0302A"/>
+      <path d="M44 60 h12 M43 70 h14" stroke="#EFE8D8" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M41 56 L24 48" stroke="#B0302A" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M59 56 L76 48" stroke="#B0302A" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M2 40 A26 26 0 0 1 30 28 L24 52 Z" fill="#B0302A"/>
+      <g stroke="#EFE8D8" stroke-width="1.6" fill="none">
+        <path d="M8 36 L23 48 M15 31 L26 47 M22 29 L28 45"/>
+      </g>
+      <path d="M76 48 v-8" stroke="#B0302A" stroke-width="2.6" stroke-linecap="round"/>
+      <g fill="#B0302A"><circle cx="76" cy="34" r="5"/><circle cx="86" cy="40" r="4.2"/><circle cx="88" cy="29" r="3.6"/></g>
+    </g></g>
+</svg>

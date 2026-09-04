@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="cho 비숍">
+  <title>비숍 · po 변환 (카드: sindaeryuk)</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -17.4,-42.0 L 17.4,-42.0 L 42.0,-17.4 L 42.0,17.4 L 17.4,42.0 L -17.4,42.0 L -42.0,17.4 L -42.0,-17.4 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -17.4,-42.0 L 17.4,-42.0 L 42.0,-17.4 L 42.0,17.4 L 17.4,42.0 L -17.4,42.0 L -42.0,17.4 L -42.0,-17.4 Z" fill="#EDE4CD" stroke="#124A2A" stroke-width="2.4"/><path d="M -15.1,-36.5 L 15.1,-36.5 L 36.5,-15.1 L 36.5,15.1 L 15.1,36.5 L -15.1,36.5 L -36.5,15.1 L -36.5,-15.1 Z" fill="none" stroke="#1D6B3F" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -13.7,-33.0 L 13.7,-33.0 L 33.0,-13.7 L 33.0,13.7 L 13.7,33.0 L -13.7,33.0 L -33.0,13.7 L -33.0,-13.7 Z" fill="none" stroke="#1D6B3F" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50,50) scale(.70) translate(-50,-50)" filter="url(#carve)"><g>
+      <circle cx="50" cy="13" r="6.5" fill="#1D6B3F"/>
+      <path d="M50 20 q-19 11 -19 31 q0 17 19 24 q19 -7 19 -24 q0 -20 -19 -31 Z" fill="#1D6B3F"/>
+      <path d="M38 60 L60 32" stroke="#EDE4CD" stroke-width="5.2" stroke-linecap="round" fill="none"/>
+      <rect x="29" y="74" width="42" height="7.5" rx="3.5" fill="#1D6B3F"/>
+      <path d="M23 84 h54 l5 10 H18 Z" fill="#1D6B3F"/>
+    </g></g>
+</svg>

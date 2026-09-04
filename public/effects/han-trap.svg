@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="함정 han">
+  <title>함정 han</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="17" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="28" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.11" numOctaves="2" seed="20" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <g filter="url(#carve)">
+    <ellipse cx="50" cy="56" rx="33" ry="21" fill="#1E1B16" opacity=".9"/>
+    <ellipse cx="50" cy="52" rx="33" ry="21" fill="none" stroke="#B0302A" stroke-width="3.4"/>
+    <path d="M27 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M36 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M45 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M54 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M63 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M72 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/>
+    <path d="M50 20 v10 M40 24 l5 8 M60 24 l-5 8" stroke="#B0302A" stroke-width="3"
+          stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

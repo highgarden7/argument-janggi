@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="감염 cho">
+  <title>감염 cho</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="31" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="42" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.11" numOctaves="2" seed="34" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <g filter="url(#carve)">
+    <circle cx="50" cy="50" r="34" fill="none" stroke="#1D6B3F" stroke-width="3.4" stroke-dasharray="4 6"/>
+    <g fill="#1D6B3F">
+      <circle cx="50" cy="50" r="8"/>
+      <circle cx="31" cy="37" r="4.6"/><circle cx="69" cy="39" r="3.8"/>
+      <circle cx="35" cy="66" r="3.4"/><circle cx="66" cy="63" r="5"/>
+      <circle cx="50" cy="28" r="2.8"/>
+    </g>
+    <g stroke="#1D6B3F" stroke-width="2.4" stroke-linecap="round">
+      <path d="M43 44 L36 39 M57 45 L64 42 M44 57 L38 62 M57 56 L63 60"/>
+    </g>
+  </g>
+</svg>

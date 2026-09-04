@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="han 의병">
+  <title>의병 · jol 변신</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#EDE4CD" stroke="#8A2420" stroke-width="2.4"/><path d="M -15.9,-38.5 L 15.9,-38.5 L 38.5,-15.9 L 38.5,15.9 L 15.9,38.5 L -15.9,38.5 L -38.5,15.9 L -38.5,-15.9 Z" fill="none" stroke="#B0302A" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -14.5,-35.0 L 14.5,-35.0 L 35.0,-14.5 L 35.0,14.5 L 14.5,35.0 L -14.5,35.0 L -35.0,14.5 L -35.0,-14.5 Z" fill="none" stroke="#B0302A" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50,50) scale(.70) translate(-50,-50)" filter="url(#carve)"><g>
+      <g stroke="#B0302A" stroke-width="6" stroke-linecap="round">
+        <path d="M18 84 L76 22"/><path d="M82 84 L24 22"/>
+      </g>
+      <path d="M76 22 l6 -14 l-14 5 Z" fill="#B0302A"/>
+      <path d="M24 22 l-6 -14 l14 5 Z" fill="#B0302A"/>
+      <g stroke="#B0302A" stroke-width="2.6" stroke-linecap="round" opacity=".75">
+        <path d="M34 68 l-7 3 M66 68 l7 3 M40 60 l-6 3 M60 60 l6 3"/>
+      </g>
+      <path d="M22 46 q28 -12 56 0 q-28 10 -56 0 Z" fill="#B0302A"/>
+      <path d="M50 52 l-9 26 l9 -8 l9 8 Z" fill="#B0302A"/>
+      <circle cx="50" cy="47" r="6.5" fill="#EDE4CD"/>
+      <circle cx="50" cy="47" r="3" fill="#B0302A"/>
+    </g></g><g class="pips"><circle cx="42.2" cy="79" r="2.6" fill="#B0302A"/><circle cx="50.0" cy="79" r="2.6" fill="#B0302A"/><circle cx="57.8" cy="79" r="2.6" fill="#B0302A"/></g>
+</svg>

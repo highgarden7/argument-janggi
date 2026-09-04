@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute">
+  <title>증강 장기 전장 효과 스프라이트</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="17" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="28" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+      <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.11" numOctaves="2" seed="20" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <symbol id="fx-wall" viewBox="0 0 100 100">
+  <g filter="url(#carveHard)">
+    <rect x="17" y="33" width="66" height="34" rx="2" fill="#7A6647"/>
+    <g stroke="#E7DCC0" stroke-width="2.6">
+      <path d="M17 44 h66 M17 56 h66 M39 33 v11 M61 33 v11
+               M28 44 v12 M50 44 v12 M72 44 v12 M39 56 v11 M61 56 v11"/>
+    </g>
+    <rect x="17" y="33" width="66" height="34" rx="2" fill="none" stroke="#1E1B16" stroke-width="2.6"/>
+  </g>
+  </symbol>
+  <symbol id="fx-cho-trap" viewBox="0 0 100 100">
+  <g filter="url(#carve)">
+    <ellipse cx="50" cy="56" rx="33" ry="21" fill="#1E1B16" opacity=".9"/>
+    <ellipse cx="50" cy="52" rx="33" ry="21" fill="none" stroke="#1D6B3F" stroke-width="3.4"/>
+    <path d="M27 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M36 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M45 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M54 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M63 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M72 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/>
+    <path d="M50 20 v10 M40 24 l5 8 M60 24 l-5 8" stroke="#1D6B3F" stroke-width="3"
+          stroke-linecap="round" fill="none"/>
+  </g>
+  </symbol>
+  <symbol id="fx-cho-bind" viewBox="0 0 100 100">
+  <g filter="url(#carve)" fill="none" stroke="#1D6B3F" stroke-linecap="round">
+    <circle cx="50" cy="50" r="35" stroke-width="5" stroke-dasharray="14 10"/>
+    <circle cx="50" cy="50" r="26" stroke-width="2.4" opacity=".55"/>
+    <path d="M50 24 v-10 M50 76 v10 M24 50 h-10 M76 50 h10" stroke-width="4"/>
+    <path d="M37 37 L63 63 M63 37 L37 63" stroke-width="4.4" opacity=".9"/>
+  </g>
+  <g fill="#1D6B3F"><circle cx="50" cy="15" r="4"/><circle cx="50" cy="85" r="4"/>
+    <circle cx="15" cy="50" r="4"/><circle cx="85" cy="50" r="4"/></g>
+  </symbol>
+  <symbol id="fx-cho-infect" viewBox="0 0 100 100">
+  <g filter="url(#carve)">
+    <circle cx="50" cy="50" r="34" fill="none" stroke="#1D6B3F" stroke-width="3.4" stroke-dasharray="4 6"/>
+    <g fill="#1D6B3F">
+      <circle cx="50" cy="50" r="8"/>
+      <circle cx="31" cy="37" r="4.6"/><circle cx="69" cy="39" r="3.8"/>
+      <circle cx="35" cy="66" r="3.4"/><circle cx="66" cy="63" r="5"/>
+      <circle cx="50" cy="28" r="2.8"/>
+    </g>
+    <g stroke="#1D6B3F" stroke-width="2.4" stroke-linecap="round">
+      <path d="M43 44 L36 39 M57 45 L64 42 M44 57 L38 62 M57 56 L63 60"/>
+    </g>
+  </g>
+  </symbol>
+  <symbol id="fx-cho-river" viewBox="0 0 800 64">
+  <g filter="url(#carve)">
+    <rect width="800" height="64" fill="#1D6B3F" opacity=".055"/>
+    <path d="M0 18 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0" fill="none" stroke="#1D6B3F" stroke-width="3.4" stroke-linecap="round" opacity="0.85"/>
+    <path d="M0 32 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0" fill="none" stroke="#1D6B3F" stroke-width="2.8" stroke-linecap="round" opacity="0.6"/>
+    <path d="M0 46 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0" fill="none" stroke="#1D6B3F" stroke-width="3.2" stroke-linecap="round" opacity="0.75"/>
+    <rect x="368.0" y="8.0" width="64" height="48" fill="#E7DCC0" opacity=".92"/>
+    <g opacity=".75"><g transform="translate(400.0,32.0) scale(0.03527,-0.03527) translate(-506.0,-374.0)" fill="#1D6B3F" filter="url(#carve)"><path d="M115 831 107 825C145 786 190 725 206 669C316 600 400 809 115 831ZM32 608 24 602C62 567 107 509 122 457C228 394 305 597 32 608ZM101 219C90 219 54 219 54 219V200C76 198 93 193 107 184C132 168 137 76 118 -31C126 -68 149 -83 174 -83C223 -83 258 -49 260 1C262 89 221 124 220 178C219 204 227 240 238 273C253 326 334 549 380 670L365 675C159 278 159 278 133 239C121 219 116 219 101 219ZM285 15 293 -14H960C974 -14 985 -9 988 2C943 44 866 107 866 107L799 15H684V706H929C944 706 955 711 958 722C914 763 841 822 841 822L776 734H330L338 706H561V15Z"/></g></g>
+  </g>
+  </symbol>
+  <symbol id="fx-han-trap" viewBox="0 0 100 100">
+  <g filter="url(#carve)">
+    <ellipse cx="50" cy="56" rx="33" ry="21" fill="#1E1B16" opacity=".9"/>
+    <ellipse cx="50" cy="52" rx="33" ry="21" fill="none" stroke="#B0302A" stroke-width="3.4"/>
+    <path d="M27 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M36 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M45 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M54 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M63 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/><path d="M72 60 l4.5 -12 l4.5 12 Z" fill="#1E1B16"/>
+    <path d="M50 20 v10 M40 24 l5 8 M60 24 l-5 8" stroke="#B0302A" stroke-width="3"
+          stroke-linecap="round" fill="none"/>
+  </g>
+  </symbol>
+  <symbol id="fx-han-bind" viewBox="0 0 100 100">
+  <g filter="url(#carve)" fill="none" stroke="#B0302A" stroke-linecap="round">
+    <circle cx="50" cy="50" r="35" stroke-width="5" stroke-dasharray="14 10"/>
+    <circle cx="50" cy="50" r="26" stroke-width="2.4" opacity=".55"/>
+    <path d="M50 24 v-10 M50 76 v10 M24 50 h-10 M76 50 h10" stroke-width="4"/>
+    <path d="M37 37 L63 63 M63 37 L37 63" stroke-width="4.4" opacity=".9"/>
+  </g>
+  <g fill="#B0302A"><circle cx="50" cy="15" r="4"/><circle cx="50" cy="85" r="4"/>
+    <circle cx="15" cy="50" r="4"/><circle cx="85" cy="50" r="4"/></g>
+  </symbol>
+  <symbol id="fx-han-infect" viewBox="0 0 100 100">
+  <g filter="url(#carve)">
+    <circle cx="50" cy="50" r="34" fill="none" stroke="#B0302A" stroke-width="3.4" stroke-dasharray="4 6"/>
+    <g fill="#B0302A">
+      <circle cx="50" cy="50" r="8"/>
+      <circle cx="31" cy="37" r="4.6"/><circle cx="69" cy="39" r="3.8"/>
+      <circle cx="35" cy="66" r="3.4"/><circle cx="66" cy="63" r="5"/>
+      <circle cx="50" cy="28" r="2.8"/>
+    </g>
+    <g stroke="#B0302A" stroke-width="2.4" stroke-linecap="round">
+      <path d="M43 44 L36 39 M57 45 L64 42 M44 57 L38 62 M57 56 L63 60"/>
+    </g>
+  </g>
+  </symbol>
+  <symbol id="fx-han-river" viewBox="0 0 800 64">
+  <g filter="url(#carve)">
+    <rect width="800" height="64" fill="#B0302A" opacity=".055"/>
+    <path d="M0 18 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0" fill="none" stroke="#B0302A" stroke-width="3.4" stroke-linecap="round" opacity="0.85"/>
+    <path d="M0 32 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0" fill="none" stroke="#B0302A" stroke-width="2.8" stroke-linecap="round" opacity="0.6"/>
+    <path d="M0 46 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0 q25 -9 50 0 q25 9 50 0" fill="none" stroke="#B0302A" stroke-width="3.2" stroke-linecap="round" opacity="0.75"/>
+    <rect x="368.0" y="8.0" width="64" height="48" fill="#E7DCC0" opacity=".92"/>
+    <g opacity=".75"><g transform="translate(400.0,32.0) scale(0.03527,-0.03527) translate(-506.0,-374.0)" fill="#B0302A" filter="url(#carve)"><path d="M115 831 107 825C145 786 190 725 206 669C316 600 400 809 115 831ZM32 608 24 602C62 567 107 509 122 457C228 394 305 597 32 608ZM101 219C90 219 54 219 54 219V200C76 198 93 193 107 184C132 168 137 76 118 -31C126 -68 149 -83 174 -83C223 -83 258 -49 260 1C262 89 221 124 220 178C219 204 227 240 238 273C253 326 334 549 380 670L365 675C159 278 159 278 133 239C121 219 116 219 101 219ZM285 15 293 -14H960C974 -14 985 -9 988 2C943 44 866 107 866 107L799 15H684V706H929C944 706 955 711 958 722C914 763 841 822 841 822L776 734H330L338 706H561V15Z"/></g></g>
+  </g>
+  </symbol>
+</svg>

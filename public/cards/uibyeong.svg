@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="37" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="48" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="40" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="none" stroke="#B0302A" stroke-width="8" filter="url(#carveHard)"/><rect x="24" y="24" width="192" height="192" rx="2" fill="none" stroke="#B0302A" stroke-width="1.8" opacity=".5" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.62) translate(-50,-50)" filter="url(#carve)"><g>
+      <g stroke="#B0302A" stroke-width="6" stroke-linecap="round">
+        <path d="M18 84 L76 22"/><path d="M82 84 L24 22"/>
+      </g>
+      <path d="M76 22 l6 -14 l-14 5 Z" fill="#B0302A"/>
+      <path d="M24 22 l-6 -14 l14 5 Z" fill="#B0302A"/>
+      <g stroke="#B0302A" stroke-width="2.6" stroke-linecap="round" opacity=".75">
+        <path d="M34 68 l-7 3 M66 68 l7 3 M40 60 l-6 3 M60 60 l6 3"/>
+      </g>
+      <path d="M22 46 q28 -12 56 0 q-28 10 -56 0 Z" fill="#B0302A"/>
+      <path d="M50 52 l-9 26 l9 -8 l9 8 Z" fill="#B0302A"/>
+      <circle cx="50" cy="47" r="6.5" fill="#EFE8D8"/>
+      <circle cx="50" cy="47" r="3" fill="#B0302A"/>
+    </g></g>
+</svg>

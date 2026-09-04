@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="han 광대">
+  <title>광대 · jol 변신</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#EDE4CD" stroke="#8A2420" stroke-width="2.4"/><path d="M -15.9,-38.5 L 15.9,-38.5 L 38.5,-15.9 L 38.5,15.9 L 15.9,38.5 L -15.9,38.5 L -38.5,15.9 L -38.5,-15.9 Z" fill="none" stroke="#B0302A" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -14.5,-35.0 L 14.5,-35.0 L 35.0,-14.5 L 35.0,14.5 L 14.5,35.0 L -14.5,35.0 L -35.0,14.5 L -35.0,-14.5 Z" fill="none" stroke="#B0302A" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50,50) scale(.70) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M50 14 q26 0 29 26 q3 26 -8 40 q-8 10 -21 10 t-21 -10 q-11 -14 -8 -40 q3 -26 29 -26 Z" fill="#B0302A"/>
+      <path d="M30 44 q9 -10 19 -2 q-10 6 -19 2 Z" fill="#EDE4CD"/>
+      <path d="M70 44 q-9 -10 -19 -2 q10 6 19 2 Z" fill="#EDE4CD"/>
+      <path d="M44 56 q6 6 12 0 q-2 10 -6 10 t-6 -10 Z" fill="#EDE4CD"/>
+      <path d="M32 68 q18 16 36 0 q-6 16 -18 16 t-18 -16 Z" fill="#EDE4CD"/>
+      <path d="M38 72 h24" stroke="#B0302A" stroke-width="2" stroke-linecap="round"/>
+      <path d="M22 34 q6 -12 16 -14 M78 34 q-6 -12 -16 -14" stroke="#B0302A" stroke-width="3.4"
+            stroke-linecap="round" fill="none"/>
+    </g></g>
+</svg>

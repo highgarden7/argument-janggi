@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="han 공성탑">
+  <title>공성탑 · cha 변신</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#EDE4CD" stroke="#8A2420" stroke-width="2.4"/><path d="M -15.9,-38.5 L 15.9,-38.5 L 38.5,-15.9 L 38.5,15.9 L 15.9,38.5 L -15.9,38.5 L -38.5,15.9 L -38.5,-15.9 Z" fill="none" stroke="#B0302A" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -14.5,-35.0 L 14.5,-35.0 L 35.0,-14.5 L 35.0,14.5 L 14.5,35.0 L -14.5,35.0 L -35.0,14.5 L -35.0,-14.5 Z" fill="none" stroke="#B0302A" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50,50) scale(.70) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M28 26 h6 v-7 h6 v7 h8 v-7 h6 v7 h8 v-7 h6 v7 h6 v10 H28 Z" fill="#B0302A"/>
+      <path d="M31 36 h38 v38 H31 Z" fill="#B0302A"/>
+      <g stroke="#EDE4CD" stroke-width="3.2" stroke-linecap="round">
+        <path d="M39 40 v30 M61 40 v30 M39 46 h22 M39 55 h22 M39 64 h22"/>
+      </g>
+      <path d="M69 44 l14 10 l-14 10 Z" fill="#B0302A"/>
+      <circle cx="39" cy="80" r="7" fill="#B0302A"/><circle cx="39" cy="80" r="2.6" fill="#EDE4CD"/>
+      <circle cx="61" cy="80" r="7" fill="#B0302A"/><circle cx="61" cy="80" r="2.6" fill="#EDE4CD"/>
+    </g></g><g class="pips"><circle cx="46.1" cy="79" r="2.6" fill="#B0302A"/><circle cx="53.9" cy="79" r="2.6" fill="#B0302A"/></g>
+</svg>

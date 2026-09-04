@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="cho 국사">
+  <title>국사 · sa 변신</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -18.2,-44.0 L 18.2,-44.0 L 44.0,-18.2 L 44.0,18.2 L 18.2,44.0 L -18.2,44.0 L -44.0,18.2 L -44.0,-18.2 Z" fill="#EDE4CD" stroke="#124A2A" stroke-width="2.4"/><path d="M -15.9,-38.5 L 15.9,-38.5 L 38.5,-15.9 L 38.5,15.9 L 15.9,38.5 L -15.9,38.5 L -38.5,15.9 L -38.5,-15.9 Z" fill="none" stroke="#1D6B3F" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -14.5,-35.0 L 14.5,-35.0 L 35.0,-14.5 L 35.0,14.5 L 14.5,35.0 L -14.5,35.0 L -35.0,14.5 L -35.0,-14.5 Z" fill="none" stroke="#1D6B3F" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50,50) scale(.70) translate(-50,-50)" filter="url(#carve)"><g>
+      <circle cx="50" cy="38" r="19" fill="none" stroke="#1D6B3F" stroke-width="3" opacity=".55"/>
+      <circle cx="50" cy="36" r="10.5" fill="#1D6B3F"/>
+      <path d="M40 30 q10 -8 20 0 q-10 -2 -20 0 Z" fill="#EDE4CD"/>
+      <path d="M36 50 q14 -6 28 0 q9 16 7 36 H29 q-2 -20 7 -36 Z" fill="#1D6B3F"/>
+      <path d="M40 54 q10 20 4 32" stroke="#EDE4CD" stroke-width="2.4" fill="none"/>
+      <g fill="#1D6B3F"><circle cx="76.0" cy="62.0" r="2.7"/><circle cx="72.5" cy="68.5" r="2.7"/><circle cx="63.0" cy="73.3" r="2.7"/><circle cx="50.0" cy="75.0" r="2.7"/><circle cx="37.0" cy="73.3" r="2.7"/><circle cx="27.5" cy="68.5" r="2.7"/><circle cx="24.0" cy="62.0" r="2.7"/><circle cx="27.5" cy="55.5" r="2.7"/><circle cx="37.0" cy="50.7" r="2.7"/><circle cx="50.0" cy="49.0" r="2.7"/><circle cx="63.0" cy="50.7" r="2.7"/><circle cx="72.5" cy="55.5" r="2.7"/></g>
+    </g></g><g class="pips"><circle cx="46.1" cy="79" r="2.6" fill="#1D6B3F"/><circle cx="53.9" cy="79" r="2.6" fill="#1D6B3F"/></g>
+</svg>

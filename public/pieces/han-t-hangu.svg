@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="han 항우">
+  <title>항우 · 궁 변신</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -19.0,-46.0 L 19.0,-46.0 L 46.0,-19.0 L 46.0,19.0 L 19.0,46.0 L -19.0,46.0 L -46.0,19.0 L -46.0,-19.0 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -19.0,-46.0 L 19.0,-46.0 L 46.0,-19.0 L 46.0,19.0 L 19.0,46.0 L -19.0,46.0 L -46.0,19.0 L -46.0,-19.0 Z" fill="#EDE4CD" stroke="#8A2420" stroke-width="2.4"/><path d="M -16.8,-40.5 L 16.8,-40.5 L 40.5,-16.8 L 40.5,16.8 L 16.8,40.5 L -16.8,40.5 L -40.5,16.8 L -40.5,-16.8 Z" fill="none" stroke="#B0302A" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -15.3,-37.0 L 15.3,-37.0 L 37.0,-15.3 L 37.0,15.3 L 15.3,37.0 L -15.3,37.0 L -37.0,15.3 L -37.0,-15.3 Z" fill="none" stroke="#B0302A" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50,50) scale(.70) translate(-50,-50)" filter="url(#carve)"><g transform="translate(-5,0)">
+      <path d="M36 31 C 54 19, 81 31, 88 53 C 81 75, 54 87, 36 75 Z" fill="#B0302A"/>
+      <g fill="#B0302A">
+        <path d="M31.5 4 l-5 12 h10 Z"/>
+        <rect x="26" y="14" width="11" height="80" rx="4" stroke="#EDE4CD" stroke-width="2.4"/>
+        <rect x="20" y="86" width="23" height="9" rx="4"/>
+        <rect x="20" y="44" width="23" height="10" rx="4"/>
+      </g>
+      <path d="M70 33 C 80 40, 84 46, 84 53 C 84 60, 80 66, 70 73" fill="none"
+            stroke="#EDE4CD" stroke-width="3.6" stroke-linecap="round" opacity=".9"/>
+    </g></g>
+</svg>

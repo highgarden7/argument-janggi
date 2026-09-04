@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="223" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="234" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="226" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="#B0302A" filter="url(#carveHard)"/><rect x="21" y="21" width="198" height="198" rx="2" fill="none" stroke="#EFE8D8" stroke-width="3.4" opacity=".9" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.72) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M10 20 h58 v34 H34 L22 68 V54 H10 Z" fill="none" stroke="#EFE8D8" stroke-width="4"
+            stroke-linejoin="round"/>
+      <g stroke="#EFE8D8" stroke-width="3.4" stroke-linecap="round">
+        <path d="M22 32 h34 M22 42 h24"/>
+      </g>
+      <g><g transform="translate(72,74)"><path d="M -7.0,-17.0 L 7.0,-17.0 L 17.0,-7.0 L 17.0,7.0 L 7.0,17.0 L -7.0,17.0 L -17.0,7.0 L -17.0,-7.0 Z" fill="#B0302A" stroke="#EFE8D8" stroke-width="1.9"/></g><g transform="translate(72,74) scale(0.01899,-0.01899) translate(-499.5,-377.0)" fill="#EFE8D8" filter="url(#carve)"><path d="M158 224C162 161 120 106 82 84C49 69 25 39 37 1C51 -39 100 -50 136 -29C189 2 226 94 171 225ZM285 223 273 220C285 163 288 87 273 22C346 -75 475 88 285 223ZM419 229 409 223C438 176 465 105 464 45C551 -34 654 143 419 229ZM561 245 552 238C592 205 637 148 649 98C744 41 811 227 561 245ZM294 734H461V614H294ZM177 763V231H198C258 231 294 258 294 266V289H808C795 149 772 56 746 35C736 28 727 26 711 26C688 26 615 31 570 35V21C614 13 652 0 670 -18C686 -34 690 -57 690 -88C752 -88 793 -80 826 -56C879 -18 908 86 924 270C945 272 957 279 965 287L860 375L799 317H577V437H838C852 437 863 442 866 453C823 490 753 541 753 541L692 465H577V586H837C852 586 862 591 865 602C823 638 753 689 753 689L692 614H577V734H863C877 734 889 739 892 750C847 788 774 842 774 842L710 763H308L177 812ZM294 586H461V465H294ZM294 437H461V317H294Z"/></g></g>
+      <path d="M72 52 v-6" stroke="#EFE8D8" stroke-width="0"/>
+      <g stroke="#EFE8D8" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <path d="M72 50 v8 M66 54 l6 6 l6 -6"/>
+      </g>
+      <path d="M84 20 l8 -6 M88 32 l10 -2" stroke="#EFE8D8" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+    </g></g>
+</svg>

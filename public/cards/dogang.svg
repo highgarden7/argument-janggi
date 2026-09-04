@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="175" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="186" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="178" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="none" stroke="#B0302A" stroke-width="8" filter="url(#carveHard)"/><rect x="24" y="24" width="192" height="192" rx="2" fill="none" stroke="#B0302A" stroke-width="1.8" opacity=".5" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.72) translate(-50,-50)" filter="url(#carve)"><g>
+      <g stroke="#B0302A" stroke-width="4" fill="none" stroke-linecap="round" opacity=".65">
+        <path d="M6 54 q11 -8 22 0 t22 0 t22 0 t22 0"/>
+        <path d="M6 70 q11 -8 22 0 t22 0 t22 0 t22 0"/>
+      </g>
+      <g><g transform="translate(50,26)"><path d="M -7.0,-17.0 L 7.0,-17.0 L 17.0,-7.0 L 17.0,7.0 L 7.0,17.0 L -7.0,17.0 L -17.0,7.0 L -17.0,-7.0 Z" fill="#EFE8D8" stroke="#B0302A" stroke-width="1.9"/></g><g transform="translate(50,26) scale(0.01899,-0.01899) translate(-499.5,-377.0)" fill="#B0302A" filter="url(#carve)"><path d="M158 224C162 161 120 106 82 84C49 69 25 39 37 1C51 -39 100 -50 136 -29C189 2 226 94 171 225ZM285 223 273 220C285 163 288 87 273 22C346 -75 475 88 285 223ZM419 229 409 223C438 176 465 105 464 45C551 -34 654 143 419 229ZM561 245 552 238C592 205 637 148 649 98C744 41 811 227 561 245ZM294 734H461V614H294ZM177 763V231H198C258 231 294 258 294 266V289H808C795 149 772 56 746 35C736 28 727 26 711 26C688 26 615 31 570 35V21C614 13 652 0 670 -18C686 -34 690 -57 690 -88C752 -88 793 -80 826 -56C879 -18 908 86 924 270C945 272 957 279 965 287L860 375L799 317H577V437H838C852 437 863 442 866 453C823 490 753 541 753 541L692 465H577V586H837C852 586 862 591 865 602C823 638 753 689 753 689L692 614H577V734H863C877 734 889 739 892 750C847 788 774 842 774 842L710 763H308L177 812ZM294 586H461V465H294ZM294 437H461V317H294Z"/></g></g>
+      <path d="M50 44 v-6" stroke="#B0302A" stroke-width="3.6" stroke-linecap="round"/>
+      <path d="M42 34 l8 -8 l8 8" stroke="#B0302A" stroke-width="3.6" fill="none"
+            stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+      <path d="M50 88 v-16 M42 80 l8 -8 l8 8" stroke="#B0302A" stroke-width="4" fill="none"
+            stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 50 80)"/>
+      <path d="M34 92 L66 92" stroke="#B0302A" stroke-width="3.4" stroke-linecap="round"/>
+      <path d="M38 96 L62 96" stroke="#B0302A" stroke-width="0"/>
+      <g stroke="#B0302A" stroke-width="3.4" stroke-linecap="round"><path d="M36 90 L64 90"/></g>
+      <path d="M28 88 L44 88" stroke="#B0302A" stroke-width="0"/>
+    </g></g>
+</svg>

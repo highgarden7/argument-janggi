@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="46" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="57" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="49" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="none" stroke="#B0302A" stroke-width="8" filter="url(#carveHard)"/><rect x="24" y="24" width="192" height="192" rx="2" fill="none" stroke="#B0302A" stroke-width="1.8" opacity=".5" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.62) translate(-50,-50)" filter="url(#carve)"><g>
+      <circle cx="50" cy="38" r="19" fill="none" stroke="#B0302A" stroke-width="3" opacity=".55"/>
+      <circle cx="50" cy="36" r="10.5" fill="#B0302A"/>
+      <path d="M40 30 q10 -8 20 0 q-10 -2 -20 0 Z" fill="#EFE8D8"/>
+      <path d="M36 50 q14 -6 28 0 q9 16 7 36 H29 q-2 -20 7 -36 Z" fill="#B0302A"/>
+      <path d="M40 54 q10 20 4 32" stroke="#EFE8D8" stroke-width="2.4" fill="none"/>
+      <g fill="#B0302A"><circle cx="76.0" cy="62.0" r="2.7"/><circle cx="72.5" cy="68.5" r="2.7"/><circle cx="63.0" cy="73.3" r="2.7"/><circle cx="50.0" cy="75.0" r="2.7"/><circle cx="37.0" cy="73.3" r="2.7"/><circle cx="27.5" cy="68.5" r="2.7"/><circle cx="24.0" cy="62.0" r="2.7"/><circle cx="27.5" cy="55.5" r="2.7"/><circle cx="37.0" cy="50.7" r="2.7"/><circle cx="50.0" cy="49.0" r="2.7"/><circle cx="63.0" cy="50.7" r="2.7"/><circle cx="72.5" cy="55.5" r="2.7"/></g>
+    </g></g>
+</svg>

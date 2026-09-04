@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="34" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="45" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="37" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="none" stroke="#B0302A" stroke-width="8" filter="url(#carveHard)"/><rect x="24" y="24" width="192" height="192" rx="2" fill="none" stroke="#B0302A" stroke-width="1.8" opacity=".5" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.62) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M50 14 q26 0 29 26 q3 26 -8 40 q-8 10 -21 10 t-21 -10 q-11 -14 -8 -40 q3 -26 29 -26 Z" fill="#B0302A"/>
+      <path d="M30 44 q9 -10 19 -2 q-10 6 -19 2 Z" fill="#EFE8D8"/>
+      <path d="M70 44 q-9 -10 -19 -2 q10 6 19 2 Z" fill="#EFE8D8"/>
+      <path d="M44 56 q6 6 12 0 q-2 10 -6 10 t-6 -10 Z" fill="#EFE8D8"/>
+      <path d="M32 68 q18 16 36 0 q-6 16 -18 16 t-18 -16 Z" fill="#EFE8D8"/>
+      <path d="M38 72 h24" stroke="#B0302A" stroke-width="2" stroke-linecap="round"/>
+      <path d="M22 34 q6 -12 16 -14 M78 34 q-6 -12 -16 -14" stroke="#B0302A" stroke-width="3.4"
+            stroke-linecap="round" fill="none"/>
+    </g></g>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="han 천마">
+  <title>천마 · ma 강화</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="24" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <g transform="translate(50,50)"><path d="M -16.1,-39.0 L 16.1,-39.0 L 39.0,-16.1 L 39.0,16.1 L 16.1,39.0 L -16.1,39.0 L -39.0,16.1 L -39.0,-16.1 Z" fill="#D6C8A6" transform="translate(1.5,2.5)" opacity=".55"/><path d="M -16.1,-39.0 L 16.1,-39.0 L 39.0,-16.1 L 39.0,16.1 L 16.1,39.0 L -16.1,39.0 L -39.0,16.1 L -39.0,-16.1 Z" fill="#EDE4CD" stroke="#8A2420" stroke-width="2.4"/><path d="M -13.9,-33.5 L 13.9,-33.5 L 33.5,-13.9 L 33.5,13.9 L 13.9,33.5 L -13.9,33.5 L -33.5,13.9 L -33.5,-13.9 Z" fill="none" stroke="#B0302A" stroke-width="1.3" opacity=".8" filter="url(#carve)"/><path d="M -12.4,-30.0 L 12.4,-30.0 L 30.0,-12.4 L 30.0,12.4 L 12.4,30.0 L -12.4,30.0 L -30.0,12.4 L -30.0,-12.4 Z" fill="none" stroke="#B0302A" stroke-width="0.9" opacity=".5" filter="url(#carve)"/></g><g transform="translate(50.0,50.0) scale(0.03781,-0.03781) translate(-499.5,-377.0)" fill="#B0302A" filter="url(#carve)"><path d="M158 224C162 161 120 106 82 84C49 69 25 39 37 1C51 -39 100 -50 136 -29C189 2 226 94 171 225ZM285 223 273 220C285 163 288 87 273 22C346 -75 475 88 285 223ZM419 229 409 223C438 176 465 105 464 45C551 -34 654 143 419 229ZM561 245 552 238C592 205 637 148 649 98C744 41 811 227 561 245ZM294 734H461V614H294ZM177 763V231H198C258 231 294 258 294 266V289H808C795 149 772 56 746 35C736 28 727 26 711 26C688 26 615 31 570 35V21C614 13 652 0 670 -18C686 -34 690 -57 690 -88C752 -88 793 -80 826 -56C879 -18 908 86 924 270C945 272 957 279 965 287L860 375L799 317H577V437H838C852 437 863 442 866 453C823 490 753 541 753 541L692 465H577V586H837C852 586 862 591 865 602C823 638 753 689 753 689L692 614H577V734H863C877 734 889 739 892 750C847 788 774 842 774 842L710 763H308L177 812ZM294 586H461V465H294ZM294 437H461V317H294Z"/></g><g filter="url(#carve)"><g fill="#B0302A"><path d="M20 40 q-12 4 -14 14 q10 -4 16 -4 Z"/><path d="M18 52 q-12 4 -13 13 q9 -5 15 -5 Z"/><path d="M80 40 q12 4 14 14 q-10 -4 -16 -4 Z"/><path d="M82 52 q12 4 13 13 q-9 -5 -15 -5 Z"/></g></g>
+</svg>

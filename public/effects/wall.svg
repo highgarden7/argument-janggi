@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="방벽 · 중립">
+  <title>방벽 · 중립</title>
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="23" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="34" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.11" numOctaves="2" seed="26" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <g filter="url(#carveHard)">
+    <rect x="17" y="33" width="66" height="34" rx="2" fill="#7A6647"/>
+    <g stroke="#E7DCC0" stroke-width="2.6">
+      <path d="M17 44 h66 M17 56 h66 M39 33 v11 M61 33 v11
+               M28 44 v12 M50 44 v12 M72 44 v12 M39 56 v11 M61 56 v11"/>
+    </g>
+    <rect x="17" y="33" width="66" height="34" rx="2" fill="none" stroke="#1E1B16" stroke-width="2.6"/>
+  </g>
+</svg>

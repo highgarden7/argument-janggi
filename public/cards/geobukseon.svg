@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+    <filter id="carve" x="-14%" y="-14%" width="128%" height="128%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="10" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="21" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  
+    <filter id="carveHard" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.10" numOctaves="2" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="6" fill="#EFE8D8"/>
+  <rect x="10" y="10" width="220" height="220" rx="4" fill="none" stroke="#B0302A" stroke-width="8" filter="url(#carveHard)"/><rect x="24" y="24" width="192" height="192" rx="2" fill="none" stroke="#B0302A" stroke-width="1.8" opacity=".5" filter="url(#carve)"/>
+  <g transform="translate(120.0,120.0) scale(1.62) translate(-50,-50)" filter="url(#carve)"><g>
+      <path d="M22 50 Q50 20 78 50 Z" fill="#B0302A"/>
+      <path d="M29 43 v-9 M39 35 v-10 M50 32 v-10 M61 35 v-10 M71 43 v-9"
+            stroke="#B0302A" stroke-width="3.4" stroke-linecap="round"/>
+      <path d="M14 52 h72 l-9 15 H23 Z" fill="#B0302A"/>
+      <g fill="#EFE8D8">
+        <rect x="27" y="56" width="8" height="6" rx="1"/>
+        <rect x="42" y="56" width="8" height="6" rx="1"/>
+        <rect x="57" y="56" width="8" height="6" rx="1"/>
+      </g>
+      <path d="M86 53 q13 -3 15 -13 q-5 -6 -13 -3 l-2 8 Z" fill="#B0302A"/>
+      <circle cx="93" cy="43" r="2.2" fill="#EFE8D8"/>
+      <g stroke="#B0302A" fill="none" stroke-linecap="round">
+        <path d="M10 72 q10 -6 20 0 t20 0 t20 0 t20 0" stroke-width="2.8"/>
+      </g>
+    </g></g>
+</svg>
