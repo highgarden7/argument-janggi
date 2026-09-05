@@ -27,9 +27,9 @@
         "category":  "TRANSFORM",
         "activation":  "ACTIVE",
         "basePiece":  "sa",
-        "cost":  1.5,
+        "cost":  3.0,
         "draw":  "OWN_SA",
-        "text":  "내 사를 호위무사로 바꿉니다. 호위무사는 기존 1칸 행마를 유지하며 궁성 밖으로 나갈 수 있습니다."
+        "text":  "내 사를 호위무사로 바꿉니다. 호위무사는 주변 8칸을 이동할 수 있으며, 궁성 밖으로 나갈 수 있습니다."
     },
     {
         "id":  "jeoncha",
