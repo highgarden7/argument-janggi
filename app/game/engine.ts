@@ -398,7 +398,9 @@ export function legalMoves(state:GameState,pieceId:string){
   const ridingHost=piece?.carriedBy?state.pieces.find(host=>!host.captured&&host.id===piece.carriedBy&&host.side===piece.side):undefined;
   const mountedSoldier=!!piece?.carriedBy&&piece.type==="jol"&&yeokmachaActive&&ridingHost?.type==="ma";
   const towerPassenger=!!piece?.carriedBy&&ridingHost?.transformCardId==="gongseongtap";
+  // 잠복한 도깨비는 판 위에 없으므로 주인도 움직일 수 없다.
   if(!piece||piece.carriedBy&&!mountedSoldier&&!towerPassenger||piece.side!==state.turn||isFrozenByMudang(state,pieceId))return[];
+  if(piece.hidden&&piece.transformCardId==="dokkaebi")return[];
   // 사라진 도깨비가 선 칸은 상대에게 빈 칸으로 취급된다.
   const board=state.pieces.filter(candidate=>!(candidate.hidden&&candidate.transformCardId==="dokkaebi"&&candidate.side!==piece.side));
   let moves=generatePieceMoves(board,piece,getModifiers(state,piece)).filter(square=>naesiCanFollow(state,piece,square));
@@ -559,7 +561,9 @@ function applyMovePiece(state:GameState,pieceId:string,to:Square):GameState {
   let myosupuriPlans={...state.myosupuriPlans};
   const mover=pieces.find(piece=>piece.id===pieceId)!;
   const from={x:mover.x,y:mover.y};
-  const swept=mover.transformCardId==="geobukseon"?piecesStrictlyBetween(pieces,mover,to).filter(piece=>piece.side!==mover.side):[];
+  // 잠복한 도깨비는 판 위에 없는 것으로 본다. 잡히지도, 휩쓸리지도 않는다.
+  const away=(candidate:Piece)=>!!candidate.hidden&&candidate.transformCardId==="dokkaebi"&&candidate.side!==mover.side;
+  const swept=mover.transformCardId==="geobukseon"?piecesStrictlyBetween(pieces,mover,to).filter(piece=>piece.side!==mover.side&&!away(piece)):[];
   const carriedPassenger=pieces.find(piece=>!piece.captured&&piece.carriedBy===mover.id);
   const yeokmachaActive=cards[mover.side].some(card=>card.cardId==="yeokmacha"&&card.state==="active");
   const ridingHost=mover.carriedBy?pieces.find(piece=>!piece.captured&&piece.id===mover.carriedBy):undefined;
@@ -572,8 +576,8 @@ function applyMovePiece(state:GameState,pieceId:string,to:Square):GameState {
   const stashCaptured=(target:Piece)=>{if(mover.transformCardId!=="jangdolbaengi"||target.side===mover.side||target.type==="gung"||reserves[mover.side].length>=2)return;reserves[mover.side].push({id:`${target.id}-jangdol-${state.revision}-${capturedPieces.length}`,side:mover.side,type:target.type,x:-1,y:-1})};
   const completeCapture=(target:Piece)=>{target.captured=true;capturedPieces.push(target);stashCaptured(target);for(const passenger of pieces.filter(p=>!p.captured&&p.carriedBy===target.id)){if(target.type==="ma"&&passenger.type==="jol"&&cards[target.side].some(card=>card.cardId==="yeokmacha"&&card.state==="active")){passenger.captured=true;passenger.carriedBy=undefined;capturedPieces.push(passenger);stashCaptured(passenger)}else passenger.carriedBy=undefined}const linked=cards[target.side].find(c=>c.targetPieceId===target.id);if(linked&&linked.state!=="used")linked.state=linked.cardId==="myosupuri"?"used":"inert";if(target.type==="gung"&&!cards[target.side].some(c=>c.cardId==="suryeom-cheongjeong")){winner=mover.side;endReason="capture_king"}};
   for(const target of swept)completeCapture(target);
-  const captured=pieces.find(p=>!p.captured&&!p.carriedBy&&p.side!==mover.side&&same(p,to));let captureCompleted=false;if(captured){if((captured.hp||1)>1)captured.hp=(captured.hp||1)-1;else{completeCapture(captured);captureCompleted=true}}
-  const destinationStillDefended=captureCompleted&&pieces.some(p=>!p.captured&&!p.carriedBy&&p.side!==mover.side&&same(p,to));
+  const captured=pieces.find(p=>!p.captured&&!p.carriedBy&&!away(p)&&p.side!==mover.side&&same(p,to));let captureCompleted=false;if(captured){if((captured.hp||1)>1)captured.hp=(captured.hp||1)-1;else{completeCapture(captured);captureCompleted=true}}
+  const destinationStillDefended=captureCompleted&&pieces.some(p=>!p.captured&&!p.carriedBy&&!away(p)&&p.side!==mover.side&&same(p,to));
   const arrived=!captured||captureCompleted&&!destinationStillDefended;
   if(arrived){
     mover.x=to.x;
@@ -584,8 +588,8 @@ function applyMovePiece(state:GameState,pieceId:string,to:Square):GameState {
     if(carriedPassenger){carriedPassenger.x=to.x;carriedPassenger.y=to.y}
     else if(boardingTarget)boardingTarget.carriedBy=mover.id;
   }
-  if(mover.transformCardId==="hongipo"&&arrived){const blastSquare=hongipoBlastSquare({...mover,x:from.x,y:from.y},to);const blastTarget=blastSquare&&pieces.find(p=>!p.captured&&!p.carriedBy&&p.side!==mover.side&&same(p,blastSquare));if(blastTarget)completeCapture(blastTarget)}
-  if(mover.transformCardId==="hwacha"&&arrived){for(const target of pieces.filter(p=>!p.captured&&!p.carriedBy&&p.side!==mover.side&&p.type==="jol"&&Math.abs(p.x-to.x)+Math.abs(p.y-to.y)===1))completeCapture(target)}
+  if(mover.transformCardId==="hongipo"&&arrived){const blastSquare=hongipoBlastSquare({...mover,x:from.x,y:from.y},to);const blastTarget=blastSquare&&pieces.find(p=>!p.captured&&!p.carriedBy&&!away(p)&&p.side!==mover.side&&same(p,blastSquare));if(blastTarget)completeCapture(blastTarget)}
+  if(mover.transformCardId==="hwacha"&&arrived){for(const target of pieces.filter(p=>!p.captured&&!p.carriedBy&&!away(p)&&p.side!==mover.side&&p.type==="jol"&&Math.abs(p.x-to.x)+Math.abs(p.y-to.y)===1))completeCapture(target)}
   if(mover.type==="gung"&&arrived){const follower=pieces.find(p=>!p.captured&&!p.carriedBy&&p.side===mover.side&&p.transformCardId==="naesi");if(follower){follower.x+=to.x-from.x;follower.y+=to.y-from.y}}
   if(mover.transformCardId==="yubang"&&arrived){jeokgi=jeokgi.filter(marker=>marker.side!==mover.side||!same(marker,from));const ownMarkers=jeokgi.filter(marker=>marker.side===mover.side);if(ownMarkers.length>=3){const oldest=ownMarkers[0],index=jeokgi.indexOf(oldest);jeokgi.splice(index,1)}jeokgi.push({...from,side:mover.side})}
   if(mover.transformCardId==="jeoktoma"&&captureCompleted)mover.growth=Math.min(2,(mover.growth||0)+1);

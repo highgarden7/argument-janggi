@@ -86,22 +86,43 @@ export function finishAction(
   const returningDokkaebi = pieces.filter((piece) =>
     !piece.captured && piece.hidden && piece.transformCardId === "dokkaebi" && piece.side === nextTurn);
   const dokkaebiCaptures: Piece[] = [];
-  for (const dokkaebi of returningDokkaebi) {
-    dokkaebi.hidden = false;
-    for (const victim of pieces) {
-      if (victim.id === dokkaebi.id || victim.captured || victim.carriedBy) continue;
-      if (victim.x !== dokkaebi.x || victim.y !== dokkaebi.y) continue;
-      victim.captured = true;
-      dokkaebiCaptures.push(victim);
+  /** 도깨비가 돌아오며 치는 기물. 일반 포획과 같은 뒷정리를 거친다. */
+  const destroy = (victim: Piece) => {
+    victim.captured = true;
+    dokkaebiCaptures.push(victim);
+    for (const passenger of pieces) {
+      if (passenger.captured || passenger.carriedBy !== victim.id) continue;
+      // 역마차에 탄 졸은 말과 함께 쓰러지고, 그 밖의 탑승 기물은 그 자리에 남는다.
+      if (victim.type === "ma" && passenger.type === "jol" && cards[victim.side].some((card) => card.cardId === "yeokmacha" && card.state === "active")) {
+        passenger.captured = true;
+        passenger.carriedBy = undefined;
+        dokkaebiCaptures.push(passenger);
+      } else passenger.carriedBy = undefined;
     }
+    const linked = cards[victim.side].find((card) => card.targetPieceId === victim.id);
+    if (linked && linked.state !== "used") linked.state = linked.cardId === "myosupuri" ? "used" : "inert";
+    if (victim.type === "gung" && !cards[victim.side].some((card) => card.cardId === "suryeom-cheongjeong")) {
+      winner = opponent(victim.side);
+      endReason = "capture_king";
+    }
+  };
+
+  for (const dokkaebi of returningDokkaebi) {
+    // 내구가 남은 기물(공성탑·거북선 등)은 한 번에 부서지지 않는다. 탑승 기물도 그 자리에 남는다.
+    // 칸이 비워지지 않으면 도깨비는 나타나지 못하고 잠복한 채 다음 차례에 다시 친다.
+    const occupants = pieces.filter((piece) =>
+      piece.id !== dokkaebi.id && !piece.captured && !piece.carriedBy && piece.x === dokkaebi.x && piece.y === dokkaebi.y);
+    for (const victim of occupants) {
+      if ((victim.hp ?? 1) > 1) { victim.hp = (victim.hp ?? 1) - 1; continue; }
+      destroy(victim);
+    }
+    const stillOccupied = pieces.some((piece) =>
+      piece.id !== dokkaebi.id && !piece.captured && !piece.carriedBy && piece.x === dokkaebi.x && piece.y === dokkaebi.y);
+    if (!stillOccupied) dokkaebi.hidden = false;
   }
   if (mover.transformCardId === "dokkaebi") {
     const vanishing = pieces.find((piece) => piece.id === mover.id);
     if (vanishing && !vanishing.captured) vanishing.hidden = true;
-  }
-  if (!winner) {
-    const fallenKing = dokkaebiCaptures.find((piece) => piece.type === "gung");
-    if (fallenKing) { winner = opponent(fallenKing.side); endReason = "capture_king"; }
   }
 
   for (const restriction of state.restrictions.filter(

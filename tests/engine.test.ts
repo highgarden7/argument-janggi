@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { pieceArtPath } from "../app/art-assets";
 import { DRAFT_SET_EXCLUSIVE_GROUPS, DRAFT_CLOCK_MS, INITIAL_CLOCK_MS, MOVE_INCREMENT_MS, Piece, canUseUibyeongRest, cardActivationKind, createGame, generatePieceMoves, hunsukkunDropTargets, isFrozenByMudang, jangdolbaengiDropTargets, drawCards, legalMoves, migrateGameState, movePiece, myosupuriPlanningMoves, palaceLineTargets, projectGameView, reduceGame, restrictionTurnsRemaining, totalCost, trapTargets } from "../app/game/engine";
+import type { GameState } from "../app/game/model";
 import { DRAW_REQUIREMENT_RULES } from "../app/game/draw-requirements";
 import cards from "../app/game/cards.json";
 
@@ -1435,4 +1436,90 @@ test("항우와 유방은 한 선택 화면에 함께 오르지 않는다", () =
   }
   assert.ok(hangu>0&&yubang>0,"두 카드 모두 후보에 오르기는 한다");
   assert.equal(together,0);
+});
+
+test("잠복한 도깨비는 판 위에 없으므로 잡히지 않는다", () => {
+  const state=withAugment("dokkaebi");
+  const horse=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="ma")!;
+  const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:horse.id},"cho").state;
+  const cha=used.pieces.find(piece=>piece.side==="han"&&piece.type==="cha")!;
+  // 잠복한 도깨비(3,2) 위쪽에 한 차(3,5)를 두고 그 칸으로 들어가게 한다.
+  const staged={...used,turn:"han" as const,pieces:used.pieces.map(piece=>{
+    if(piece.id===horse.id)return {...piece,x:3,y:2,hidden:true};
+    if(piece.id===cha.id)return {...piece,x:3,y:5};
+    if(piece.x===3&&piece.y<=4&&piece.id!==horse.id)return {...piece,captured:true};
+    return {...piece};
+  })};
+  const entered=reduceGame(staged,{type:"MOVE_PIECE",pieceId:cha.id,to:{x:3,y:2}},"han");
+  assert.equal(entered.accepted,true,"빈 칸처럼 들어갈 수 있다");
+  const dokkaebi=entered.state.pieces.find(piece=>piece.id===horse.id)!;
+  assert.equal(dokkaebi.captured,undefined,"잠복 중에는 잡히지 않는다");
+  // 한 수가 끝나면 곧바로 초 차례이므로 도깨비가 돌아와 그 칸의 차를 잡는다.
+  assert.equal(entered.state.turn,"cho");
+  assert.equal(dokkaebi.hidden,false);
+  assert.equal(entered.state.pieces.find(piece=>piece.id===cha.id)?.captured,true,"들어온 차를 잡는다");
+  assert.ok(entered.state.moves.at(-1)?.capturedIds?.includes(cha.id));
+});
+
+test("도깨비는 내구가 남은 기물을 한 번에 부수지 못하고 잠복을 이어간다", () => {
+  const state=withAugment("dokkaebi");
+  const horse=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="ma")!;
+  const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:horse.id},"cho").state;
+  const tower=used.pieces.find(piece=>piece.side==="han"&&piece.type==="cha")!;
+  const jol=used.pieces.find(piece=>piece.side==="han"&&piece.type==="jol")!;
+  // 잠복한 도깨비(3,2) 칸에 내구 2인 공성탑을 세워 둔다.
+  let board:GameState={...used,turn:"han",pieces:used.pieces.map(piece=>{
+    if(piece.id===horse.id)return {...piece,x:3,y:2,hidden:true};
+    if(piece.id===tower.id)return {...piece,x:3,y:2,transformCardId:"gongseongtap",hp:2};
+    return {...piece};
+  })};
+
+  // 한이 아무 수나 두면 초 차례가 되며 도깨비가 내구만 깎는다.
+  board=reduceGame(board,{type:"MOVE_PIECE",pieceId:jol.id,to:legalMoves(board,jol.id)[0]},"han").state;
+  assert.equal(board.turn,"cho");
+  assert.equal(board.pieces.find(piece=>piece.id===tower.id)?.hp,1,"내구가 1 깎인다");
+  assert.equal(board.pieces.find(piece=>piece.id===tower.id)?.captured,undefined,"아직 부서지지 않는다");
+  const lurking=board.pieces.find(piece=>piece.id===horse.id)!;
+  assert.equal(lurking.hidden,true,"칸이 비지 않아 판에 나타나지 않는다");
+  assert.deepEqual(legalMoves(board,horse.id),[],"잠복 중에는 주인도 움직일 수 없다");
+
+  // 초가 다른 기물로 한 수 두고 한도 한 수 두면, 다음 초 차례에 공성탑이 부서지고 도깨비가 나타난다.
+  const ally=board.pieces.find(piece=>piece.side==="cho"&&piece.type==="jol"&&legalMoves(board,piece.id).length>0)!;
+  board=reduceGame(board,{type:"MOVE_PIECE",pieceId:ally.id,to:legalMoves(board,ally.id)[0]},"cho").state;
+  const hanMover=board.pieces.find(piece=>piece.side==="han"&&piece.id!==tower.id&&!piece.captured&&legalMoves(board,piece.id).length>0)!;
+  board=reduceGame(board,{type:"MOVE_PIECE",pieceId:hanMover.id,to:legalMoves(board,hanMover.id)[0]},"han").state;
+
+  assert.equal(board.pieces.find(piece=>piece.id===tower.id)?.captured,true,"두 번째 타격에 부서진다");
+  assert.equal(board.pieces.find(piece=>piece.id===horse.id)?.hidden,false,"칸이 비면 도깨비가 나타난다");
+});
+
+test("도깨비가 공성탑을 부수면 탑승 기물은 그 자리에 남아 다음 차례에 맞는다", () => {
+  const state=withAugment("dokkaebi");
+  const horse=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="ma")!;
+  const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:horse.id},"cho").state;
+  const tower=used.pieces.find(piece=>piece.side==="han"&&piece.type==="cha")!;
+  const rider=used.pieces.find(piece=>piece.side==="han"&&piece.type==="po")!;
+  const jol=used.pieces.find(piece=>piece.side==="han"&&piece.type==="jol")!;
+  // 내구 1만 남은 공성탑에 기물이 타고 있고, 그 칸에 도깨비가 잠복해 있다.
+  let board:GameState={...used,turn:"han",pieces:used.pieces.map(piece=>{
+    if(piece.id===horse.id)return {...piece,x:3,y:2,hidden:true};
+    if(piece.id===tower.id)return {...piece,x:3,y:2,transformCardId:"gongseongtap",hp:1};
+    if(piece.id===rider.id)return {...piece,x:3,y:2,carriedBy:tower.id};
+    return {...piece};
+  })};
+
+  board=reduceGame(board,{type:"MOVE_PIECE",pieceId:jol.id,to:legalMoves(board,jol.id)[0]},"han").state;
+  assert.equal(board.pieces.find(piece=>piece.id===tower.id)?.captured,true,"공성탑은 부서진다");
+  const survivor=board.pieces.find(piece=>piece.id===rider.id)!;
+  assert.equal(survivor.captured,undefined,"탑승 기물은 살아남는다");
+  assert.equal(survivor.carriedBy,undefined,"탑에서 내려 그 자리에 선다");
+  assert.equal(board.pieces.find(piece=>piece.id===horse.id)?.hidden,true,"살아남은 기물 때문에 도깨비는 아직 나타나지 못한다");
+
+  // 다시 한 바퀴 돌면 남은 탑승 기물까지 잡고 나타난다.
+  const ally=board.pieces.find(piece=>piece.side==="cho"&&piece.type==="jol"&&legalMoves(board,piece.id).length>0)!;
+  board=reduceGame(board,{type:"MOVE_PIECE",pieceId:ally.id,to:legalMoves(board,ally.id)[0]},"cho").state;
+  const hanMover=board.pieces.find(piece=>piece.side==="han"&&piece.id!==rider.id&&!piece.captured&&legalMoves(board,piece.id).length>0)!;
+  board=reduceGame(board,{type:"MOVE_PIECE",pieceId:hanMover.id,to:legalMoves(board,hanMover.id)[0]},"han").state;
+  assert.equal(board.pieces.find(piece=>piece.id===rider.id)?.captured,true,"다음 차례에 탑승 기물이 잡힌다");
+  assert.equal(board.pieces.find(piece=>piece.id===horse.id)?.hidden,false,"칸이 비어 도깨비가 나타난다");
 });
