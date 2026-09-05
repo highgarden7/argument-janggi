@@ -163,7 +163,7 @@ export type GameCommand =
   | { type: "DEPLOY_HUNSUKKUN_RESERVE"; reservePieceId: string; to: Square }
   | { type: "PICK_AUGMENT"; cardId: string }
   | { type: "TEST_GRANT_AUGMENT"; side: Side; cardId: string }
-  | { type: "USE_AUGMENT"; cardIndex: number; targetPieceId?: string; targetSquare?: Square; targetLine?: Square[]; targetSquares?: Square[] }
+  | { type: "USE_AUGMENT"; cardIndex: number; targetPieceId?: string; targetPieceIds?: string[]; targetSquare?: Square; targetLine?: Square[]; targetSquares?: Square[] }
   | { type: "ADVANCE_CLOCK"; elapsedMs: number }
   | { type: "RESIGN" };
 

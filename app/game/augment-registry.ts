@@ -1,20 +1,18 @@
-import type { Card, GameState, Piece, PieceType, Side, Square } from "./model";
-import { opponent, squareKey } from "./model";
+import type { Card, GameState, Piece, Side, Square } from "./model";
+import { squareKey } from "./model";
 
 export type AugmentHook = "onAcquire" | "onActivate";
 export type AugmentContext = {
   side: Side;
   card: Card;
   targetPieceId?: string;
+  /** 위치를 맞바꾸는 증강이 고른 기물 두 개. */
+  targetPieceIds?: string[];
   targetSquare?: Square;
   targetLine?: Square[];
 };
 export type AugmentHandler = (state: GameState, context: AugmentContext) => GameState;
 export type AugmentDefinition = Partial<Record<AugmentHook, AugmentHandler>>;
-
-function firstPiece(pieces: Piece[], side: Side, type?: PieceType): Piece | undefined {
-  return pieces.find((piece) => !piece.captured && piece.side === side && piece.type !== "gung" && (!type || piece.type === type));
-}
 
 function clonePieces(state: GameState): Piece[] {
   return state.pieces.map((piece) => ({ ...piece }));
@@ -109,12 +107,10 @@ export const AUGMENT_REGISTRY: Record<string, AugmentDefinition> = {
     }),
   },
   eunsin: {
-    onActivate: (state, { side }) => {
-      const pieces = clonePieces(state);
-      const piece = firstPiece(pieces, side);
-      if (piece) piece.shielded = 1;
-      return { ...state, pieces };
-    },
+    onActivate: (state, { targetPieceId }) => ({
+      ...state,
+      pieces: state.pieces.map((piece) => piece.id === targetPieceId ? { ...piece, shielded: 1 } : piece),
+    }),
   },
   gyeolbak: {
     onActivate: (state, { targetPieceId }) => ({
@@ -134,79 +130,32 @@ export const AUGMENT_REGISTRY: Record<string, AugmentDefinition> = {
       pieces: state.pieces.map((piece) => piece.id === targetPieceId ? { ...piece, side } : piece),
     }),
   },
-  jaribakkum: {
-    onActivate: (state, { side }) => {
-      const pieces = clonePieces(state);
-      const own = pieces.filter((piece) => !piece.captured && piece.side === side && piece.type !== "gung");
-      const first = own[0];
-      const second = own.find((piece) => piece.type !== first?.type);
-      if (first && second) {
-        const position = { x: first.x, y: first.y };
-        first.x = second.x;
-        first.y = second.y;
-        second.x = position.x;
-        second.y = position.y;
-      }
-      return { ...state, pieces };
-    },
-  },
+  jaribakkum: { onActivate: swapChosenPieces },
   "sungan-idong": {
-    onActivate: (state, { side }) => {
-      const pieces = clonePieces(state);
-      const piece = firstPiece(pieces, side);
-      const occupied = new Set(pieces.filter((row) => !row.captured).map(squareKey));
-      if (piece) {
-        outer: for (let y = 0; y < 10; y += 1) {
-          for (let x = 0; x < 9; x += 1) {
-            if (!occupied.has(squareKey({ x, y }))) {
-              piece.x = x;
-              piece.y = y;
-              break outer;
-            }
-          }
-        }
+    onActivate: (state, { targetPieceId, targetSquare }) => targetSquare
+      ? {
+        ...state,
+        pieces: state.pieces.map((piece) =>
+          piece.id === targetPieceId ? { ...piece, x: targetSquare.x, y: targetSquare.y } : piece,
+        ),
       }
-      return { ...state, pieces };
-    },
+      : state,
   },
   buhwal: {
-    onActivate: (state, { side }) => {
-      const pieces = clonePieces(state);
-      const piece = pieces.find((row) => row.captured && row.side === side && row.type !== "gung");
-      const occupied = new Set(pieces.filter((row) => !row.captured).map(squareKey));
-      const ranks = side === "cho" ? [0, 1, 2, 3, 4] : [9, 8, 7, 6, 5];
-      if (piece) {
-        outer: for (const y of ranks) {
-          for (let x = 0; x < 9; x += 1) {
-            if (!occupied.has(squareKey({ x, y }))) {
-              piece.x = x;
-              piece.y = y;
-              piece.captured = false;
-              break outer;
-            }
-          }
-        }
+    onActivate: (state, { targetPieceId, targetSquare }) => targetSquare
+      ? {
+        ...state,
+        pieces: state.pieces.map((piece) =>
+          piece.id === targetPieceId
+            ? { ...piece, x: targetSquare.x, y: targetSquare.y, captured: false, carriedBy: undefined }
+            : piece,
+        ),
       }
-      return { ...state, pieces };
-    },
+      : state,
   },
-  daeyeok: {
-    onActivate: (state, { side }) => {
-      const pieces = clonePieces(state);
-      const king = pieces.find((piece) => !piece.captured && piece.side === side && piece.type === "gung");
-      const guard = pieces.find((piece) => !piece.captured && piece.side === side && piece.type === "sa");
-      if (king && guard) {
-        const position = { x: king.x, y: king.y };
-        king.x = guard.x;
-        king.y = guard.y;
-        guard.x = position.x;
-        guard.y = position.y;
-      }
-      return { ...state, pieces };
-    },
-  },
-  bonghwa: { onActivate: moveKingToFirstOpenSquare },
-  cheondo: { onActivate: moveKingToFirstOpenSquare },
+  daeyeok: { onActivate: swapChosenPieces },
+  bonghwa: { onActivate: moveKingToChosenSquare },
+  cheondo: { onActivate: moveKingToChosenSquare },
   bangbyeok: {
     onActivate: (state, { targetSquare }) => targetSquare
       ? { ...state, walls: [...state.walls, { ...targetSquare, remaining: 6 }] }
@@ -227,40 +176,33 @@ function addPalaceStructure(state: GameState, { side, card, targetLine }: Augmen
   };
 }
 
-function moveKingToFirstOpenSquare(state: GameState, context: AugmentContext): GameState {
-  const { side, card } = context;
+/** 플레이어가 고른 기물 두 개의 좌표를 맞바꾼다. 유효성은 엔진이 이미 검증했다. */
+function swapChosenPieces(state: GameState, { targetPieceIds }: AugmentContext): GameState {
+  const [firstId, secondId] = targetPieceIds ?? [];
   const pieces = clonePieces(state);
-  const king = pieces.find((piece) => !piece.captured && piece.side === side && piece.type === "gung");
-  const occupied = new Set(pieces.filter((piece) => !piece.captured).map(squareKey));
-  const ranks = card.id === "bonghwa"
-    ? side === "cho" ? [0, 1, 2] : [7, 8, 9]
-    : side === "cho" ? [0, 1, 2, 3, 4] : [5, 6, 7, 8, 9];
-  if (king) {
-    outer: for (const y of ranks) {
-      const minX = card.id === "bonghwa" ? 3 : 0;
-      const maxX = card.id === "bonghwa" ? 5 : 8;
-      for (let x = minX; x <= maxX; x += 1) {
-        if (!occupied.has(squareKey({ x, y }))) {
-          king.x = x;
-          king.y = y;
-          break outer;
-        }
-      }
-    }
-  }
+  const first = pieces.find((piece) => piece.id === firstId);
+  const second = pieces.find((piece) => piece.id === secondId);
+  if (!first || !second) return state;
+  const position = { x: first.x, y: first.y };
+  first.x = second.x;
+  first.y = second.y;
+  second.x = position.x;
+  second.y = position.y;
   return { ...state, pieces };
+}
+
+function moveKingToChosenSquare(state: GameState, { side, targetSquare }: AugmentContext): GameState {
+  if (!targetSquare) return state;
+  return {
+    ...state,
+    pieces: state.pieces.map((piece) =>
+      !piece.captured && piece.side === side && piece.type === "gung"
+        ? { ...piece, x: targetSquare.x, y: targetSquare.y }
+        : piece,
+    ),
+  };
 }
 
 export function runAugmentHook(state: GameState, hook: AugmentHook, context: AugmentContext): GameState {
   return AUGMENT_REGISTRY[context.card.id]?.[hook]?.(state, context) ?? state;
-}
-
-export function automaticEnemyTarget(state: GameState, side: Side, card: Card): Piece | undefined {
-  const enemy = opponent(side);
-  const type = card.draw === "ENEMY_CHA" ? "cha"
-    : card.draw === "ENEMY_PO" ? "po"
-      : card.draw === "ENEMY_MA" ? "ma"
-        : card.draw === "ENEMY_JOL" ? "jol"
-          : undefined;
-  return firstPiece(state.pieces, enemy, type);
 }

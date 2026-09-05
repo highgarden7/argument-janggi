@@ -1523,3 +1523,140 @@ test("도깨비가 공성탑을 부수면 탑승 기물은 그 자리에 남아 
   assert.equal(board.pieces.find(piece=>piece.id===rider.id)?.captured,true,"다음 차례에 탑승 기물이 잡힌다");
   assert.equal(board.pieces.find(piece=>piece.id===horse.id)?.hidden,false,"칸이 비어 도깨비가 나타난다");
 });
+
+test("자리바꿈은 고른 내 기물 2개의 위치만 맞바꾼다", () => {
+  const state=withAugment("jaribakkum");
+  const index=state.cards.cho.length-1;
+  const cha=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="cha")!;
+  const ma=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="ma")!;
+  const before={cha:{x:cha.x,y:cha.y},ma:{x:ma.x,y:ma.y}};
+
+  const missing=reduceGame(state,{type:"USE_AUGMENT",cardIndex:index},"cho");
+  assert.equal(missing.accepted,false,"대상을 고르지 않으면 발동하지 않는다");
+
+  const sameType=state.pieces.filter(piece=>piece.side==="cho"&&piece.type==="cha");
+  const rejectedSameType=reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceIds:[sameType[0].id,sameType[1].id]},"cho");
+  assert.equal(rejectedSameType.accepted,false,"같은 종류끼리는 맞바꿀 수 없다");
+
+  const king=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="gung")!;
+  assert.equal(reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceIds:[king.id,ma.id]},"cho").accepted,false,"궁은 대상이 아니다");
+  assert.equal(reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceIds:[cha.id,cha.id]},"cho").accepted,false,"같은 기물을 두 번 고를 수 없다");
+
+  const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceIds:[cha.id,ma.id]},"cho");
+  assert.equal(used.accepted,true,"서로 다른 종류의 내 기물 2개는 맞바꾼다");
+  const movedCha=used.state.pieces.find(piece=>piece.id===cha.id)!;
+  const movedMa=used.state.pieces.find(piece=>piece.id===ma.id)!;
+  assert.deepEqual({x:movedCha.x,y:movedCha.y},before.ma,"차가 마 자리로 간다");
+  assert.deepEqual({x:movedMa.x,y:movedMa.y},before.cha,"마가 차 자리로 간다");
+});
+
+test("대역은 고른 사와 궁의 위치만 맞바꾼다", () => {
+  const state=withAugment("daeyeok");
+  const index=state.cards.cho.length-1;
+  const king=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="gung")!;
+  const guards=state.pieces.filter(piece=>piece.side==="cho"&&piece.type==="sa");
+  const chosen=guards[1];
+  const before={king:{x:king.x,y:king.y},guard:{x:chosen.x,y:chosen.y},other:{...guards[0]}};
+
+  const enemyGuard=state.pieces.find(piece=>piece.side==="han"&&piece.type==="sa")!;
+  assert.equal(reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceIds:[king.id,enemyGuard.id]},"cho").accepted,false,"상대 사는 대상이 아니다");
+
+  const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceIds:[king.id,chosen.id]},"cho");
+  assert.equal(used.accepted,true,"궁과 내 사는 맞바꾼다");
+  const movedKing=used.state.pieces.find(piece=>piece.id===king.id)!;
+  const movedGuard=used.state.pieces.find(piece=>piece.id===chosen.id)!;
+  const untouched=used.state.pieces.find(piece=>piece.id===before.other.id)!;
+  assert.deepEqual({x:movedKing.x,y:movedKing.y},before.guard,"궁이 고른 사 자리로 간다");
+  assert.deepEqual({x:movedGuard.x,y:movedGuard.y},before.king,"고른 사가 궁 자리로 간다");
+  assert.deepEqual({x:untouched.x,y:untouched.y},{x:before.other.x,y:before.other.y},"고르지 않은 사는 그대로다");
+});
+
+test("부활은 고른 잡힌 기물을 고른 내 진영 빈칸에 되살린다", () => {
+  const state=withAugment("buhwal");
+  const index=state.cards.cho.length-1;
+  const [fallen,other]=state.pieces.filter(piece=>piece.side==="cho"&&piece.type==="jol");
+  const board:GameState={...state,pieces:state.pieces.map(piece=>
+    piece.id===fallen.id||piece.id===other.id?{...piece,captured:true}:{...piece})};
+
+  assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index},"cho").accepted,false,"되살릴 기물을 골라야 한다");
+  const alive=board.pieces.find(piece=>piece.side==="cho"&&piece.type==="cha")!;
+  assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:alive.id,targetSquare:{x:0,y:4}},"cho").accepted,false,"살아 있는 기물은 되살릴 수 없다");
+  assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:other.id,targetSquare:{x:0,y:9}},"cho").accepted,false,"상대 진영에는 되살릴 수 없다");
+  assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:other.id,targetSquare:{x:alive.x,y:alive.y}},"cho").accepted,false,"기물이 있는 칸에는 되살릴 수 없다");
+
+  const used=reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:fallen.id,targetSquare:{x:0,y:4}},"cho");
+  assert.equal(used.accepted,true,"고른 기물을 고른 빈칸에 되살린다");
+  const revived=used.state.pieces.find(piece=>piece.id===fallen.id)!;
+  assert.equal(revived.captured,false,"판으로 돌아온다");
+  assert.deepEqual({x:revived.x,y:revived.y},{x:0,y:4},"고른 칸에 놓인다");
+  assert.equal(used.state.pieces.find(piece=>piece.id===other.id)?.captured,true,"고르지 않은 기물은 잡힌 채로 남는다");
+});
+
+test("상대를 겨냥하는 제약 증강은 고른 기물에만 걸린다", () => {
+  for(const [cardId,type] of [["gyeolbak","ma"],["sucha","cha"],["talyeong","jol"],["yeokbyeong","jol"]] as const){
+    const state=withAugment(cardId);
+    const index=state.cards.cho.length-1;
+    const targets=state.pieces.filter(piece=>piece.side==="han"&&piece.type===type);
+    const chosen=targets[1];
+
+    assert.equal(reduceGame(state,{type:"USE_AUGMENT",cardIndex:index},"cho").accepted,false,`${cardId}: 대상을 고르지 않으면 발동하지 않는다`);
+    const own=state.pieces.find(piece=>piece.side==="cho"&&piece.type===type)!;
+    assert.equal(reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:own.id},"cho").accepted,false,`${cardId}: 내 기물은 대상이 아니다`);
+
+    const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:chosen.id},"cho");
+    assert.equal(used.accepted,true,`${cardId}: 고른 상대 기물에 발동한다`);
+    if(cardId==="gyeolbak")assert.equal(used.state.pieces.find(piece=>piece.id===chosen.id)?.frozen,2,"결박은 고른 기물을 묶는다");
+    if(cardId==="yeokbyeong")assert.equal(used.state.pieces.find(piece=>piece.id===chosen.id)?.infected,true,"역병은 고른 기물에 옮는다");
+    if(cardId==="sucha"||cardId==="talyeong"){
+      const restriction=used.state.restrictions.find(row=>row.cardId===cardId)!;
+      assert.equal(restriction.targetPieceId,chosen.id,`${cardId}: 고른 기물이 제약 대상이다`);
+    }
+  }
+});
+
+test("부상은 상대의 마와 상만 겨냥한다", () => {
+  const state=withAugment("busang");
+  const index=state.cards.cho.length-1;
+  const enemyCha=state.pieces.find(piece=>piece.side==="han"&&piece.type==="cha")!;
+  assert.equal(reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:enemyCha.id},"cho").accepted,false,"차는 대상이 아니다");
+  for(const type of ["ma","sang"] as const){
+    const target=state.pieces.find(piece=>piece.side==="han"&&piece.type===type)!;
+    const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:target.id},"cho");
+    assert.equal(used.accepted,true,`${type}는 대상이다`);
+    assert.equal(used.state.restrictions.find(row=>row.cardId==="busang")?.targetPieceId,target.id,"고른 기물이 제약 대상이다");
+  }
+});
+
+test("은신·순간이동·봉화·천도는 고른 기물과 칸에만 적용된다", () => {
+  const eunsin=withAugment("eunsin");
+  const eunsinIndex=eunsin.cards.cho.length-1;
+  const guarded=eunsin.pieces.find(piece=>piece.side==="cho"&&piece.type==="po")!;
+  assert.equal(reduceGame(eunsin,{type:"USE_AUGMENT",cardIndex:eunsinIndex},"cho").accepted,false,"은신은 대상을 골라야 한다");
+  const hidden=reduceGame(eunsin,{type:"USE_AUGMENT",cardIndex:eunsinIndex,targetPieceId:guarded.id},"cho");
+  assert.equal(hidden.state.pieces.find(piece=>piece.id===guarded.id)?.shielded,1,"고른 기물이 보호받는다");
+
+  const teleport=withAugment("sungan-idong");
+  const teleportIndex=teleport.cards.cho.length-1;
+  const traveler=teleport.pieces.find(piece=>piece.side==="cho"&&piece.type==="sang")!;
+  assert.equal(reduceGame(teleport,{type:"USE_AUGMENT",cardIndex:teleportIndex,targetPieceId:traveler.id},"cho").accepted,false,"도착 칸을 골라야 한다");
+  const moved=reduceGame(teleport,{type:"USE_AUGMENT",cardIndex:teleportIndex,targetPieceId:traveler.id,targetSquare:{x:4,y:5}},"cho");
+  assert.equal(moved.accepted,true,"고른 빈칸으로 옮긴다");
+  const arrived=moved.state.pieces.find(piece=>piece.id===traveler.id)!;
+  assert.deepEqual({x:arrived.x,y:arrived.y},{x:4,y:5},"고른 칸에 선다");
+
+  const bonghwa=withAugment("bonghwa");
+  const bonghwaIndex=bonghwa.cards.cho.length-1;
+  assert.equal(reduceGame(bonghwa,{type:"USE_AUGMENT",cardIndex:bonghwaIndex,targetSquare:{x:0,y:4}},"cho").accepted,false,"봉화는 궁성 밖으로 못 간다");
+  const beacon=reduceGame(bonghwa,{type:"USE_AUGMENT",cardIndex:bonghwaIndex,targetSquare:{x:3,y:2}},"cho");
+  assert.equal(beacon.accepted,true,"궁성 안 빈칸으로 옮긴다");
+  const beaconKing=beacon.state.pieces.find(piece=>piece.side==="cho"&&piece.type==="gung")!;
+  assert.deepEqual({x:beaconKing.x,y:beaconKing.y},{x:3,y:2},"고른 궁성 칸으로 간다");
+
+  const cheondo=withAugment("cheondo");
+  const cheondoIndex=cheondo.cards.cho.length-1;
+  assert.equal(reduceGame(cheondo,{type:"USE_AUGMENT",cardIndex:cheondoIndex,targetSquare:{x:0,y:9}},"cho").accepted,false,"천도는 상대 진영으로 못 간다");
+  const capital=reduceGame(cheondo,{type:"USE_AUGMENT",cardIndex:cheondoIndex,targetSquare:{x:0,y:4}},"cho");
+  assert.equal(capital.accepted,true,"내 진영 빈칸으로 옮긴다");
+  const capitalKing=capital.state.pieces.find(piece=>piece.side==="cho"&&piece.type==="gung")!;
+  assert.deepEqual({x:capitalKing.x,y:capitalKing.y},{x:0,y:4},"고른 진영 칸으로 간다");
+});

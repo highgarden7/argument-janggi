@@ -1,4 +1,4 @@
-import { automaticEnemyTarget, runAugmentHook } from "./augment-registry";
+import { runAugmentHook } from "./augment-registry";
 import { CARD_BY_ID, CARDS, cardActivationKind, restrictionTurnsRemaining, totalCost } from "./catalog";
 import { meetsDrawRequirement } from "./draw-requirements";
 import {
@@ -483,15 +483,94 @@ export function ownPieceTargetType(card:Card):PieceType|undefined {
   return transformTargetType(card)??(card.id==="jingbyeong"?"jol":undefined);
 }
 
-export type AugmentPieceTarget = { side:"own"|"enemy"; type?:PieceType; excludeKing?:boolean; allowTransformed?:boolean };
+export type AugmentPieceTarget = { side:"own"|"enemy"; type?:PieceType; types?:PieceType[]; excludeKing?:boolean; allowTransformed?:boolean };
+/**
+ * 대상을 직접 지정해야 하는 증강의 전수 목록. 여기에 등록된 카드는 자동 선택 없이
+ * 플레이어가 고른 기물만 사용하며, 검증은 `matchesPieceTarget`이 담당한다.
+ */
 export function augmentPieceTarget(card:Card):AugmentPieceTarget|undefined {
   const transformed=transformTargetType(card);
   if(transformed)return{side:"own",type:transformed};
-  if(card.id==="jingbyeong")return{side:"own",type:"jol"};
-  if(card.id==="maesu")return{side:"enemy",type:"jol",allowTransformed:true};
-  if(card.id==="amhaeng-eosa")return{side:"own",type:"jol",allowTransformed:true};
-  if(card.id==="hunsukkun"||card.id==="myosupuri")return{side:"own",excludeKing:true,allowTransformed:true};
+  switch(card.id){
+    case"jingbyeong":return{side:"own",type:"jol"};
+    case"maesu":return{side:"enemy",type:"jol",allowTransformed:true};
+    case"amhaeng-eosa":return{side:"own",type:"jol",allowTransformed:true};
+    case"hunsukkun":case"myosupuri":return{side:"own",excludeKing:true,allowTransformed:true};
+    case"eunsin":case"sungan-idong":return{side:"own",allowTransformed:true};
+    case"gyeolbak":case"injil":case"homyeong":return{side:"enemy",excludeKing:true,allowTransformed:true};
+    case"busang":return{side:"enemy",types:["ma","sang"],allowTransformed:true};
+    case"sucha":return{side:"enemy",type:"cha",allowTransformed:true};
+    case"talyeong":case"yeokbyeong":return{side:"enemy",type:"jol",allowTransformed:true};
+    default:return undefined;
+  }
+}
+
+/** 기물 두 개의 위치를 맞바꾸는 증강. 첫 번째·두 번째 슬롯의 조건을 따로 둔다. */
+export type AugmentSwapTarget = { first:AugmentPieceTarget; second:AugmentPieceTarget; distinctTypes?:boolean };
+export function augmentSwapTarget(card:Card):AugmentSwapTarget|undefined {
+  if(card.id==="jaribakkum"){
+    const slot:AugmentPieceTarget={side:"own",excludeKing:true,allowTransformed:true};
+    return{first:slot,second:slot,distinctTypes:true};
+  }
+  if(card.id==="daeyeok")return{first:{side:"own",type:"gung",allowTransformed:true},second:{side:"own",type:"sa",allowTransformed:true}};
   return undefined;
+}
+
+export function matchesPieceTarget(piece:Piece|undefined,target:AugmentPieceTarget,side:Side):piece is Piece {
+  if(!piece||piece.captured||piece.carriedBy)return false;
+  if(piece.side!==(target.side==="own"?side:opponent(side)))return false;
+  if(target.type&&piece.type!==target.type)return false;
+  if(target.types&&!target.types.includes(piece.type))return false;
+  if(target.excludeKing&&piece.type==="gung")return false;
+  if(!target.allowTransformed&&piece.transformCardId)return false;
+  return true;
+}
+
+/** 한 기물을 지정하는 증강의 선택 가능 목록. UI 강조와 엔진 검증이 같은 규칙을 쓴다. */
+export function augmentPieceCandidates(state:GameState,side:Side,card:Card):Piece[] {
+  const target=augmentPieceTarget(card);
+  if(!target)return[];
+  return state.pieces.filter(piece=>matchesPieceTarget(piece,target,side)
+    &&(card.id!=="maesu"||state.pieces.some(mine=>!mine.captured&&!mine.carriedBy&&mine.side===side&&Math.abs(mine.x-piece.x)+Math.abs(mine.y-piece.y)===1)));
+}
+
+export function swapCandidates(state:GameState,side:Side,card:Card,slot:"first"|"second",firstPieceId?:string):Piece[] {
+  const swap=augmentSwapTarget(card);
+  if(!swap)return[];
+  const chosen=firstPieceId?state.pieces.find(piece=>piece.id===firstPieceId):undefined;
+  return state.pieces.filter(piece=>
+    matchesPieceTarget(piece,swap[slot],side)&&
+    piece.id!==firstPieceId&&
+    (slot==="first"||!swap.distinctTypes||!chosen||piece.type!==chosen.type));
+}
+
+/** 부활 대상은 잡혀서 판을 떠난 내 기물이다. 궁은 되살릴 수 없다. */
+export function revivablePieces(state:GameState,side:Side):Piece[] {
+  return state.pieces.filter(piece=>piece.captured&&piece.side===side&&piece.type!=="gung");
+}
+
+const AUGMENT_TARGET_PROMPT:Record<string,string>={
+  maesu:"내 기물과 인접한 상대 졸·병을 선택하세요.",
+  jingbyeong:"징병할 내 졸·병을 선택하세요.",
+  "amhaeng-eosa":"암행어사로 지정할 내 졸·병을 선택하세요.",
+  hunsukkun:"대기시킬 내 기물을 선택하세요.",
+  myosupuri:"묘수풀이를 적용할 내 기물을 선택하세요.",
+  eunsin:"은신시킬 내 기물을 선택하세요.",
+  "sungan-idong":"순간이동시킬 내 기물을 선택하세요.",
+  gyeolbak:"결박할 상대 기물을 선택하세요.",
+  injil:"인질로 지정할 상대 기물을 선택하세요.",
+  homyeong:"호명할 상대 기물을 선택하세요.",
+  busang:"부상을 입힐 상대 마 또는 상을 선택하세요.",
+  sucha:"녹슬게 할 상대 차를 선택하세요.",
+  talyeong:"탈영시킬 상대 졸·병을 선택하세요.",
+  yeokbyeong:"역병을 옮길 상대 졸·병을 선택하세요.",
+};
+
+export function augmentTargetPrompt(card:Card,side:Side,target=augmentPieceTarget(card)):string {
+  const known=AUGMENT_TARGET_PROMPT[card.id];
+  if(known)return known;
+  if(target?.type)return `변신시킬 ${PIECE_LABEL[side][target.type]} 기물을 선택하세요.`;
+  return "증강을 적용할 기물을 선택하세요.";
 }
 
 function emptySquares(state:GameState,squares:Square[]):Square[]{
@@ -512,6 +591,29 @@ export function hunsukkunDropTargets(state:GameState,side:Side):Square[]{
   if(!state.waitingPieces[side].some(piece=>(piece.availablePly??0)<=state.ply))return[];
   const ranks=side==="cho"?[0,1,2,3,4]:[5,6,7,8,9];
   return emptySquares(state,ranks.flatMap(y=>Array.from({length:9},(_,x)=>({x,y}))));
+}
+
+function territorySquares(side:Side):Square[]{
+  const ranks=side==="cho"?[0,1,2,3,4]:[5,6,7,8,9];
+  return ranks.flatMap(y=>Array.from({length:9},(_,x)=>({x,y})));
+}
+
+function palaceSquares(side:Side):Square[]{
+  const ranks=side==="cho"?[0,1,2]:[7,8,9];
+  return ranks.flatMap(y=>[3,4,5].map(x=>({x,y})));
+}
+
+/**
+ * 도착 칸을 직접 골라야 하는 증강의 전수 목록. `undefined`는 칸 선택이 없는 증강이다.
+ * 방벽·함정은 각자의 전용 흐름을 쓰므로 여기에서 제외한다.
+ */
+export function augmentSquareTargets(state:GameState,side:Side,card:Card):Square[]|undefined {
+  switch(card.id){
+    case"buhwal":case"cheondo":return emptySquares(state,territorySquares(side));
+    case"bonghwa":return emptySquares(state,palaceSquares(side));
+    case"sungan-idong":return emptySquares(state,Array.from({length:90},(_,index)=>({x:index%9,y:Math.floor(index/9)})));
+    default:return undefined;
+  }
 }
 
 function acquire(state:GameState,side:Side,cardId:string,slot:0|1|2):GameState {
@@ -648,7 +750,7 @@ function applyHunsukkunDrop(state:GameState,reservePieceId:string,to:Square):Gam
   return finishAction(state,{pieces,cards,waitingPieces,mover,from:to,to},{openDraft});
 }
 
-function applyActivateCard(state:GameState,side:Side,index:number,targetPieceId?:string,targetSquare?:Square,targetLine?:Square[],targetSquares?:Square[]):GameState {
+function applyActivateCard(state:GameState,side:Side,index:number,targetPieceId?:string,targetSquare?:Square,targetLine?:Square[],targetSquares?:Square[],targetPieceIds?:string[]):GameState {
   const owned=state.cards[side][index],card=owned&&CARD_BY_ID[owned.cardId];
   if(!card||owned.state!=="ready"||state.turn!==side&&!state.testMode)return state;
   const transformType=transformTargetType(card);
@@ -688,7 +790,8 @@ function applyActivateCard(state:GameState,side:Side,index:number,targetPieceId?
     const cards={...state.cards,[side]:state.cards[side].map((row,i)=>i===index?{...row,state:"used" as CardState}:row)};
     return {...state,cards,traps:[...state.traps,{...targetSquare,side}],deathmatchClock:state.deathmatch?0:state.deathmatchClock};
   }
-  const enemy=opponent(side),manualTarget=["jingbyeong","maesu"].includes(card.id),target=manualTarget?state.pieces.find(piece=>piece.id===targetPieceId):automaticEnemyTarget(state,side,card);const restrictions=[...state.restrictions];if(card.category==="RESTRICT")restrictions.push({cardId:card.id,side:enemy,remaining:Number(card.duration?.match(/\d+/)?.[0]||99),targetPieceId:["busang","sucha","talyeong","yeokbyeong","injil","homyeong"].includes(card.id)?target?.id:undefined});const remainsActive=card.category==="RESTRICT"&&card.duration!=="영구"&&!!card.duration?.match(/\d+/);const cards={...state.cards,[side]:state.cards[side].map((c,i)=>i===index?{...c,state:remainsActive?"active" as CardState:"used" as CardState}:c)};const next={...state,restrictions,cards,deathmatchClock:state.deathmatch?0:state.deathmatchClock};return runAugmentHook(next,"onActivate",{side,card,targetPieceId:target?.id,targetSquare,targetLine});
+  // 대상 지정이 필요한 증강은 플레이어가 고른 기물만 쓴다. 나머지는 진영 전체에 적용된다.
+  const enemy=opponent(side),target=augmentPieceTarget(card)?state.pieces.find(piece=>piece.id===targetPieceId):undefined;const restrictions=[...state.restrictions];if(card.category==="RESTRICT")restrictions.push({cardId:card.id,side:enemy,remaining:Number(card.duration?.match(/\d+/)?.[0]||99),targetPieceId:["busang","sucha","talyeong","yeokbyeong","injil","homyeong"].includes(card.id)?target?.id:undefined});const remainsActive=card.category==="RESTRICT"&&card.duration!=="영구"&&!!card.duration?.match(/\d+/);const cards={...state.cards,[side]:state.cards[side].map((c,i)=>i===index?{...c,state:remainsActive?"active" as CardState:"used" as CardState}:c)};const next={...state,restrictions,cards,deathmatchClock:state.deathmatch?0:state.deathmatchClock};return runAugmentHook(next,"onActivate",{side,card,targetPieceId:target?.id??targetPieceId,targetPieceIds,targetSquare,targetLine});
 }
 
 function rejected(state:GameState,code:NonNullable<GameTransition["error"]>["code"],message:string):GameTransition {
@@ -798,11 +901,30 @@ export function reduceGame(state:GameState,command:GameCommand,actor:Side):GameT
     const card=CARD_BY_ID[owned.cardId],pieceTarget=augmentPieceTarget(card);
     if(pieceTarget){
       const target=state.pieces.find(piece=>piece.id===command.targetPieceId);
-      const expectedSide=pieceTarget.side==="own"?actor:opponent(actor);
-      const invalid=!target||target.captured||target.carriedBy||target.side!==expectedSide||(pieceTarget.type&&target.type!==pieceTarget.type)||(pieceTarget.excludeKing&&target.type==="gung")||(!pieceTarget.allowTransformed&&!!target.transformCardId);
-      const adjacent=card.id!=="maesu"||!!target&&state.pieces.some(piece=>!piece.captured&&!piece.carriedBy&&piece.side===actor&&Math.abs(piece.x-target.x)+Math.abs(piece.y-target.y)===1);
+      const invalid=!matchesPieceTarget(target,pieceTarget,actor);
+      const adjacent=card.id!=="maesu"||!invalid&&!!target&&state.pieces.some(piece=>!piece.captured&&!piece.carriedBy&&piece.side===actor&&Math.abs(piece.x-target.x)+Math.abs(piece.y-target.y)===1);
       if(invalid||!adjacent){
-        return rejected(state,"INVALID_AUGMENT_TARGET",card.id==="maesu"?"내 기물과 인접한 상대 졸·병을 선택하세요.":card.id==="jingbyeong"?"징병할 내 졸·병을 선택하세요.":card.id==="amhaeng-eosa"?"암행어사로 지정할 내 졸·병을 선택하세요.":card.id==="hunsukkun"?"대기시킬 내 기물을 선택하세요.":card.id==="myosupuri"?"묘수풀이를 적용할 내 기물을 선택하세요.":`변신시킬 ${PIECE_LABEL[actor][pieceTarget.type!]} 기물을 선택하세요.`);
+        return rejected(state,"INVALID_AUGMENT_TARGET",augmentTargetPrompt(card,actor,pieceTarget));
+      }
+    }
+    const swapTarget=augmentSwapTarget(card);
+    if(swapTarget){
+      const [firstId,secondId]=command.targetPieceIds??[];
+      const first=state.pieces.find(piece=>piece.id===firstId),second=state.pieces.find(piece=>piece.id===secondId);
+      const valid=!!first&&!!second&&first.id!==second.id
+        &&matchesPieceTarget(first,swapTarget.first,actor)&&matchesPieceTarget(second,swapTarget.second,actor)
+        &&(!swapTarget.distinctTypes||first.type!==second.type);
+      if(!valid)return rejected(state,"INVALID_AUGMENT_TARGET",card.id==="daeyeok"?"위치를 맞바꿀 내 궁과 사를 차례로 선택하세요.":"위치를 맞바꿀 서로 다른 종류의 내 기물 2개를 선택하세요.");
+    }
+    if(card.id==="buhwal"){
+      const revived=revivablePieces(state,actor).find(piece=>piece.id===command.targetPieceId);
+      if(!revived)return rejected(state,"INVALID_AUGMENT_TARGET","되살릴 내 기물을 선택하세요.");
+    }
+    const squareTargets=augmentSquareTargets(state,actor,card);
+    if(squareTargets){
+      const square=command.targetSquare;
+      if(!square||!squareTargets.some(candidate=>same(candidate,square))){
+        return rejected(state,"INVALID_AUGMENT_TARGET",card.id==="buhwal"?"되살릴 기물을 놓을 내 진영 빈칸을 선택하세요.":card.id==="bonghwa"?"궁을 옮길 내 궁성 안 빈칸을 선택하세요.":card.id==="cheondo"?"궁을 옮길 내 진영 빈칸을 선택하세요.":"기물을 옮길 빈칸을 선택하세요.");
       }
     }
     if(card.id==="myosupuri"){
@@ -823,7 +945,7 @@ export function reduceGame(state:GameState,command:GameCommand,actor:Side):GameT
       const line=command.targetLine;
       if(!line||!palaceLineTargets(state,actor).some(candidate=>sameLine(candidate,line)))return rejected(state,"INVALID_AUGMENT_TARGET",`${card.name}으로 지정할 궁성 직선을 선택하세요.`);
     }
-    const next=applyActivateCard(state,actor,command.cardIndex,command.targetPieceId,command.targetSquare,command.targetLine,command.targetSquares);
+    const next=applyActivateCard(state,actor,command.cardIndex,command.targetPieceId,command.targetSquare,command.targetLine,command.targetSquares,command.targetPieceIds);
     return stampTransition(state,next,[{type:"AUGMENT_ACTIVATED",side:actor,cardId:owned.cardId}]);
   }
 
