@@ -214,6 +214,11 @@ export const opponent = (side: Side): Side => side === "cho" ? "han" : "cho";
 export const squareKey = (square: Square): string => `${square.x},${square.y}`;
 export const sameSquare = (a: Square, b: Square): boolean => a.x === b.x && a.y === b.y;
 
+/** 내시는 내 궁이 잡힐 상황에 한 번 대신 잡힌다. 아직 살아 있는 내시를 돌려준다. */
+export function naesiSubstitute(pieces: Piece[], side: Side): Piece | undefined {
+  return pieces.find((piece) => !piece.captured && !piece.carriedBy && piece.side === side && piece.transformCardId === "naesi");
+}
+
 export function derivePhase(state: Pick<GameState, "winner" | "draft">): GamePhase {
   if (state.winner) return "ENDED";
   if (state.draft) return "DRAFT";

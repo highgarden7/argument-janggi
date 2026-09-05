@@ -10,6 +10,7 @@ import {
   RULESET_VERSION,
   derivePhase,
   migrateGameState,
+  naesiSubstitute,
   opponent,
   sameSquare,
 } from "./model";
@@ -609,8 +610,8 @@ function palaceSquares(side:Side):Square[]{
  */
 export function augmentSquareTargets(state:GameState,side:Side,card:Card):Square[]|undefined {
   switch(card.id){
-    case"buhwal":case"cheondo":return emptySquares(state,territorySquares(side));
-    case"bonghwa":return emptySquares(state,palaceSquares(side));
+    case"cheondo":return emptySquares(state,territorySquares(side));
+    case"buhwal":case"bonghwa":return emptySquares(state,palaceSquares(side));
     case"sungan-idong":return emptySquares(state,Array.from({length:90},(_,index)=>({x:index%9,y:Math.floor(index/9)})));
     default:return undefined;
   }
@@ -676,9 +677,10 @@ function applyMovePiece(state:GameState,pieceId:string,to:Square):GameState {
   const capturedPieces:Piece[]=[];
   let winner:Side|undefined,endReason:GameState["endReason"],jeokgi=[...(state.jeokgi??[])];
   const stashCaptured=(target:Piece)=>{if(mover.transformCardId!=="jangdolbaengi"||target.side===mover.side||target.type==="gung"||reserves[mover.side].length>=2)return;reserves[mover.side].push({id:`${target.id}-jangdol-${state.revision}-${capturedPieces.length}`,side:mover.side,type:target.type,x:-1,y:-1})};
-  const completeCapture=(target:Piece)=>{target.captured=true;capturedPieces.push(target);stashCaptured(target);for(const passenger of pieces.filter(p=>!p.captured&&p.carriedBy===target.id)){if(target.type==="ma"&&passenger.type==="jol"&&cards[target.side].some(card=>card.cardId==="yeokmacha"&&card.state==="active")){passenger.captured=true;passenger.carriedBy=undefined;capturedPieces.push(passenger);stashCaptured(passenger)}else passenger.carriedBy=undefined}const linked=cards[target.side].find(c=>c.targetPieceId===target.id);if(linked&&linked.state!=="used")linked.state=linked.cardId==="myosupuri"?"used":"inert";if(target.type==="gung"&&!cards[target.side].some(c=>c.cardId==="suryeom-cheongjeong")){winner=mover.side;endReason="capture_king"}};
+  /** 실제로 잡혔으면 true. 내시가 궁을 대신해 잡히면 궁은 살아남고 false가 된다. */
+  const completeCapture=(target:Piece):boolean=>{const eunuch=target.type==="gung"?naesiSubstitute(pieces,target.side):undefined;if(eunuch){completeCapture(eunuch);return false}target.captured=true;capturedPieces.push(target);stashCaptured(target);for(const passenger of pieces.filter(p=>!p.captured&&p.carriedBy===target.id)){if(target.type==="ma"&&passenger.type==="jol"&&cards[target.side].some(card=>card.cardId==="yeokmacha"&&card.state==="active")){passenger.captured=true;passenger.carriedBy=undefined;capturedPieces.push(passenger);stashCaptured(passenger)}else passenger.carriedBy=undefined}const linked=cards[target.side].find(c=>c.targetPieceId===target.id);if(linked&&linked.state!=="used")linked.state=linked.cardId==="myosupuri"?"used":"inert";if(target.type==="gung"&&!cards[target.side].some(c=>c.cardId==="suryeom-cheongjeong")){winner=mover.side;endReason="capture_king"}return true};
   for(const target of swept)completeCapture(target);
-  const captured=pieces.find(p=>!p.captured&&!p.carriedBy&&!away(p)&&p.side!==mover.side&&same(p,to));let captureCompleted=false;if(captured){if((captured.hp||1)>1)captured.hp=(captured.hp||1)-1;else{completeCapture(captured);captureCompleted=true}}
+  const captured=pieces.find(p=>!p.captured&&!p.carriedBy&&!away(p)&&p.side!==mover.side&&same(p,to));let captureCompleted=false;if(captured){if((captured.hp||1)>1)captured.hp=(captured.hp||1)-1;else captureCompleted=completeCapture(captured)}
   const destinationStillDefended=captureCompleted&&pieces.some(p=>!p.captured&&!p.carriedBy&&!away(p)&&p.side!==mover.side&&same(p,to));
   const arrived=!captured||captureCompleted&&!destinationStillDefended;
   if(arrived){
@@ -703,7 +705,8 @@ function applyMovePiece(state:GameState,pieceId:string,to:Square):GameState {
     if(destination){captured.side=mover.side;captured.transformCardId=undefined;captured.captured=false;captured.x=destination.x;captured.y=destination.y}
   }
   const trapIndex=arrived?traps.findIndex(trap=>trap.side!==mover.side&&same(trap,mover)):-1;
-  if(trapIndex>=0){const [trap]=traps.splice(trapIndex,1);if(!mover.captured){mover.captured=true;capturedPieces.push(mover)}if(mover.type==="gung"){winner=trap.side;endReason="special_victory"}}
+  // 함정에 걸린 궁도 내시가 한 번 대신 잡아 준다.
+  if(trapIndex>=0){const [trap]=traps.splice(trapIndex,1);const eunuch=mover.type==="gung"?naesiSubstitute(pieces,mover.side):undefined;if(eunuch)completeCapture(eunuch);else{if(!mover.captured){mover.captured=true;capturedPieces.push(mover)}if(mover.type==="gung"){winner=trap.side;endReason="special_victory"}}}
   if(!mover.captured){const encircled=applyPowiConversions(pieces,cards,mover.side);if(encircled.winner){winner=encircled.winner;endReason="special_victory"}}
   const myosupuri=myosupuriPlans[mover.side];
   if(myosupuri?.pieceId===mover.id&&myosupuri.moves.length&&same(myosupuri.moves[0],to)){
@@ -750,6 +753,19 @@ function applyHunsukkunDrop(state:GameState,reservePieceId:string,to:Square):Gam
   return finishAction(state,{pieces,cards,waitingPieces,mover,from:to,to},{openDraft});
 }
 
+/** 판 위 기물을 실제로 옮기는 증강은 한 수를 쓴 것으로 보고 턴을 넘긴다. */
+const TURN_ENDING_AUGMENTS=new Set(["sungan-idong","jaribakkum","buhwal"]);
+
+function finishAugmentTurn(previous:GameState,applied:GameState,side:Side,movedPieceId?:string):GameState {
+  const pieces=applied.pieces.map(piece=>({...piece}));
+  const cards={cho:applied.cards.cho.map(card=>({...card})),han:applied.cards.han.map(card=>({...card}))};
+  const mover=pieces.find(piece=>piece.id===movedPieceId);
+  if(!mover)return applied;
+  const before=previous.pieces.find(piece=>piece.id===mover.id);
+  const from=before&&!before.captured?{x:before.x,y:before.y}:{x:mover.x,y:mover.y};
+  return finishAction(applied,{pieces,cards,mover,from,to:{x:mover.x,y:mover.y}},{openDraft});
+}
+
 function applyActivateCard(state:GameState,side:Side,index:number,targetPieceId?:string,targetSquare?:Square,targetLine?:Square[],targetSquares?:Square[],targetPieceIds?:string[]):GameState {
   const owned=state.cards[side][index],card=owned&&CARD_BY_ID[owned.cardId];
   if(!card||owned.state!=="ready"||state.turn!==side&&!state.testMode)return state;
@@ -791,7 +807,10 @@ function applyActivateCard(state:GameState,side:Side,index:number,targetPieceId?
     return {...state,cards,traps:[...state.traps,{...targetSquare,side}],deathmatchClock:state.deathmatch?0:state.deathmatchClock};
   }
   // 대상 지정이 필요한 증강은 플레이어가 고른 기물만 쓴다. 나머지는 진영 전체에 적용된다.
-  const enemy=opponent(side),target=augmentPieceTarget(card)?state.pieces.find(piece=>piece.id===targetPieceId):undefined;const restrictions=[...state.restrictions];if(card.category==="RESTRICT")restrictions.push({cardId:card.id,side:enemy,remaining:Number(card.duration?.match(/\d+/)?.[0]||99),targetPieceId:["busang","sucha","talyeong","yeokbyeong","injil","homyeong"].includes(card.id)?target?.id:undefined});const remainsActive=card.category==="RESTRICT"&&card.duration!=="영구"&&!!card.duration?.match(/\d+/);const cards={...state.cards,[side]:state.cards[side].map((c,i)=>i===index?{...c,state:remainsActive?"active" as CardState:"used" as CardState}:c)};const next={...state,restrictions,cards,deathmatchClock:state.deathmatch?0:state.deathmatchClock};return runAugmentHook(next,"onActivate",{side,card,targetPieceId:target?.id??targetPieceId,targetPieceIds,targetSquare,targetLine});
+  const enemy=opponent(side),target=augmentPieceTarget(card)?state.pieces.find(piece=>piece.id===targetPieceId):undefined;const restrictions=[...state.restrictions];if(card.category==="RESTRICT")restrictions.push({cardId:card.id,side:enemy,remaining:Number(card.duration?.match(/\d+/)?.[0]||99),targetPieceId:["busang","sucha","talyeong","yeokbyeong","injil","homyeong"].includes(card.id)?target?.id:undefined});const remainsActive=card.category==="RESTRICT"&&card.duration!=="영구"&&!!card.duration?.match(/\d+/);const cards={...state.cards,[side]:state.cards[side].map((c,i)=>i===index?{...c,state:remainsActive?"active" as CardState:"used" as CardState}:c)};const next={...state,restrictions,cards,deathmatchClock:state.deathmatch?0:state.deathmatchClock};const applied=runAugmentHook(next,"onActivate",{side,card,targetPieceId:target?.id??targetPieceId,targetPieceIds,targetSquare,targetLine});
+  // 테스트 모드에서 상대 진영 증강을 대신 쓸 때는 턴을 건드리지 않는다.
+  if(!TURN_ENDING_AUGMENTS.has(card.id)||state.turn!==side)return applied;
+  return finishAugmentTurn(state,applied,side,card.id==="jaribakkum"?targetPieceIds?.[0]:targetPieceId);
 }
 
 function rejected(state:GameState,code:NonNullable<GameTransition["error"]>["code"],message:string):GameTransition {
@@ -924,7 +943,7 @@ export function reduceGame(state:GameState,command:GameCommand,actor:Side):GameT
     if(squareTargets){
       const square=command.targetSquare;
       if(!square||!squareTargets.some(candidate=>same(candidate,square))){
-        return rejected(state,"INVALID_AUGMENT_TARGET",card.id==="buhwal"?"되살릴 기물을 놓을 내 진영 빈칸을 선택하세요.":card.id==="bonghwa"?"궁을 옮길 내 궁성 안 빈칸을 선택하세요.":card.id==="cheondo"?"궁을 옮길 내 진영 빈칸을 선택하세요.":"기물을 옮길 빈칸을 선택하세요.");
+        return rejected(state,"INVALID_AUGMENT_TARGET",card.id==="buhwal"?"되살릴 기물을 놓을 내 궁성 안 빈칸을 선택하세요.":card.id==="bonghwa"?"궁을 옮길 내 궁성 안 빈칸을 선택하세요.":card.id==="cheondo"?"궁을 옮길 내 진영 빈칸을 선택하세요.":"기물을 옮길 빈칸을 선택하세요.");
       }
     }
     if(card.id==="myosupuri"){
@@ -946,7 +965,12 @@ export function reduceGame(state:GameState,command:GameCommand,actor:Side):GameT
       if(!line||!palaceLineTargets(state,actor).some(candidate=>sameLine(candidate,line)))return rejected(state,"INVALID_AUGMENT_TARGET",`${card.name}으로 지정할 궁성 직선을 선택하세요.`);
     }
     const next=applyActivateCard(state,actor,command.cardIndex,command.targetPieceId,command.targetSquare,command.targetLine,command.targetSquares,command.targetPieceIds);
-    return stampTransition(state,next,[{type:"AUGMENT_ACTIVATED",side:actor,cardId:owned.cardId}]);
+    const augmentEvents:GameEvent[]=[{type:"AUGMENT_ACTIVATED",side:actor,cardId:owned.cardId}];
+    // 턴을 넘기는 증강은 착수와 같은 후속 이벤트를 남긴다.
+    if(next.draft&&!state.draft)augmentEvents.push({type:"DRAFT_OPENED",side:next.draft.side,slot:next.draft.slot});
+    if(next.turn!==state.turn)augmentEvents.push({type:"TURN_CHANGED",side:next.turn});
+    if(next.winner&&next.endReason&&!state.winner)augmentEvents.push({type:"GAME_ENDED",winner:next.winner,reason:next.endReason});
+    return stampTransition(state,next,augmentEvents);
   }
 
   const piece=state.pieces.find((row)=>row.id===command.pieceId);

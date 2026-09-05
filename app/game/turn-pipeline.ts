@@ -1,6 +1,6 @@
 import { totalCost } from "./catalog";
 import type { DraftSlot, EndReason, GameState, OwnedCard, Piece, Restriction, Side, Square } from "./model";
-import { MOVE_INCREMENT_MS, PIECE_LABEL, PIECE_VALUE, opponent } from "./model";
+import { MOVE_INCREMENT_MS, PIECE_LABEL, PIECE_VALUE, naesiSubstitute, opponent } from "./model";
 
 type ActionResolution = {
   pieces: Piece[];
@@ -88,6 +88,9 @@ export function finishAction(
   const dokkaebiCaptures: Piece[] = [];
   /** 도깨비가 돌아오며 치는 기물. 일반 포획과 같은 뒷정리를 거친다. */
   const destroy = (victim: Piece) => {
+    // 내시는 도깨비 앞에서도 궁을 한 번 대신한다.
+    const eunuch = victim.type === "gung" ? naesiSubstitute(pieces, victim.side) : undefined;
+    if (eunuch) { destroy(eunuch); return }
     victim.captured = true;
     dokkaebiCaptures.push(victim);
     for (const passenger of pieces) {

@@ -484,6 +484,15 @@
   opacity: .85;
 }
 
+/* 은신으로 잡히지 않는 기물. 양쪽 화면 모두에서 흐리게 보인다. */
+.piece.warded {
+  opacity: .5;
+}
+
+.piece.warded .piece-art {
+  filter: grayscale(.4);
+}
+
 .piece.augment-ineligible .piece-art {
   opacity: .38;
   filter: grayscale(.7);

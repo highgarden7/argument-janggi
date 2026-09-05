@@ -1571,25 +1571,73 @@ test("대역은 고른 사와 궁의 위치만 맞바꾼다", () => {
   assert.deepEqual({x:untouched.x,y:untouched.y},{x:before.other.x,y:before.other.y},"고르지 않은 사는 그대로다");
 });
 
-test("부활은 고른 잡힌 기물을 고른 내 진영 빈칸에 되살린다", () => {
+test("부활은 고른 잡힌 기물을 내 궁성 안 빈칸에만 되살린다", () => {
   const state=withAugment("buhwal");
   const index=state.cards.cho.length-1;
   const [fallen,other]=state.pieces.filter(piece=>piece.side==="cho"&&piece.type==="jol");
   const board:GameState={...state,pieces:state.pieces.map(piece=>
     piece.id===fallen.id||piece.id===other.id?{...piece,captured:true}:{...piece})};
+  const palaceSquare={x:4,y:2};
+  assert.equal(board.pieces.some(piece=>!piece.captured&&piece.x===palaceSquare.x&&piece.y===palaceSquare.y),false,"고른 궁성 칸은 비어 있다");
 
   assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index},"cho").accepted,false,"되살릴 기물을 골라야 한다");
   const alive=board.pieces.find(piece=>piece.side==="cho"&&piece.type==="cha")!;
-  assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:alive.id,targetSquare:{x:0,y:4}},"cho").accepted,false,"살아 있는 기물은 되살릴 수 없다");
+  assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:alive.id,targetSquare:palaceSquare},"cho").accepted,false,"살아 있는 기물은 되살릴 수 없다");
   assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:other.id,targetSquare:{x:0,y:9}},"cho").accepted,false,"상대 진영에는 되살릴 수 없다");
-  assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:other.id,targetSquare:{x:alive.x,y:alive.y}},"cho").accepted,false,"기물이 있는 칸에는 되살릴 수 없다");
+  assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:other.id,targetSquare:{x:0,y:4}},"cho").accepted,false,"궁성 밖 내 진영에도 되살릴 수 없다");
+  const king=board.pieces.find(piece=>piece.side==="cho"&&piece.type==="gung")!;
+  assert.equal(reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:other.id,targetSquare:{x:king.x,y:king.y}},"cho").accepted,false,"기물이 있는 칸에는 되살릴 수 없다");
 
-  const used=reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:fallen.id,targetSquare:{x:0,y:4}},"cho");
-  assert.equal(used.accepted,true,"고른 기물을 고른 빈칸에 되살린다");
+  const used=reduceGame(board,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:fallen.id,targetSquare:palaceSquare},"cho");
+  assert.equal(used.accepted,true,"고른 기물을 궁성 빈칸에 되살린다");
   const revived=used.state.pieces.find(piece=>piece.id===fallen.id)!;
   assert.equal(revived.captured,false,"판으로 돌아온다");
-  assert.deepEqual({x:revived.x,y:revived.y},{x:0,y:4},"고른 칸에 놓인다");
+  assert.deepEqual({x:revived.x,y:revived.y},palaceSquare,"고른 칸에 놓인다");
   assert.equal(used.state.pieces.find(piece=>piece.id===other.id)?.captured,true,"고르지 않은 기물은 잡힌 채로 남는다");
+});
+
+test("기물을 옮기는 증강은 한 수를 쓰고 턴을 넘긴다", () => {
+  // 순간이동·자리바꿈·부활은 착수와 같은 뒷정리를 거쳐 상대에게 차례를 넘긴다.
+  const teleport=withAugment("sungan-idong");
+  const traveler=teleport.pieces.find(piece=>piece.side==="cho"&&piece.type==="sang")!;
+  const moved=reduceGame(teleport,{type:"USE_AUGMENT",cardIndex:teleport.cards.cho.length-1,targetPieceId:traveler.id,targetSquare:{x:4,y:5}},"cho");
+  assert.equal(moved.state.turn,"han","순간이동 뒤에는 상대 차례다");
+  assert.equal(moved.state.ply,teleport.ply+1,"한 수를 소비한다");
+  assert.equal(moved.state.moves.length,teleport.moves.length+1,"기보에 남는다");
+  assert.equal(moved.state.moves.at(-1)?.pieceId,traveler.id,"옮긴 기물이 기록된다");
+  assert.equal(moved.state.clocks.cho>teleport.clocks.cho,true,"착수 가산 시간이 붙는다");
+  assert.equal(moved.events.some(event=>event.type==="TURN_CHANGED"),true,"턴 변경 이벤트가 나온다");
+
+  const swap=withAugment("jaribakkum");
+  const cha=swap.pieces.find(piece=>piece.side==="cho"&&piece.type==="cha")!;
+  const ma=swap.pieces.find(piece=>piece.side==="cho"&&piece.type==="ma")!;
+  const swapped=reduceGame(swap,{type:"USE_AUGMENT",cardIndex:swap.cards.cho.length-1,targetPieceIds:[cha.id,ma.id]},"cho");
+  assert.equal(swapped.state.turn,"han","자리바꿈 뒤에는 상대 차례다");
+  assert.equal(swapped.state.ply,swap.ply+1,"한 수를 소비한다");
+
+  const revive=withAugment("buhwal");
+  const fallen=revive.pieces.find(piece=>piece.side==="cho"&&piece.type==="jol")!;
+  const board:GameState={...revive,pieces:revive.pieces.map(piece=>piece.id===fallen.id?{...piece,captured:true}:{...piece})};
+  const revived=reduceGame(board,{type:"USE_AUGMENT",cardIndex:board.cards.cho.length-1,targetPieceId:fallen.id,targetSquare:{x:4,y:2}},"cho");
+  assert.equal(revived.state.turn,"han","부활 뒤에는 상대 차례다");
+  assert.equal(revived.state.ply,board.ply+1,"한 수를 소비한다");
+});
+
+test("훈수꾼은 내릴 때 턴을 유지하고 투입할 때 턴을 넘긴다", () => {
+  const state=withAugment("hunsukkun");
+  const piece=state.pieces.find(row=>row.side==="cho"&&row.type==="sang")!;
+  const stored=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:piece.id},"cho");
+  assert.equal(stored.accepted,true,"기물을 판에서 내린다");
+  assert.equal(stored.state.turn,"cho","내릴 때는 내 차례가 유지된다");
+  assert.equal(stored.state.ply,state.ply,"수를 소비하지 않는다");
+
+  // 대기 기물은 다음 내 턴부터 투입할 수 있다.
+  const ready:GameState={...stored.state,waitingPieces:{...stored.state.waitingPieces,cho:stored.state.waitingPieces.cho.map(row=>({...row,availablePly:0}))}};
+  const target=hunsukkunDropTargets(ready,"cho")[0];
+  const deployed=reduceGame(ready,{type:"DEPLOY_HUNSUKKUN_RESERVE",reservePieceId:piece.id,to:target},"cho");
+  assert.equal(deployed.accepted,true,"대기 기물을 투입한다");
+  assert.equal(deployed.state.turn,"han","투입하면 상대 차례로 넘어간다");
+  assert.equal(deployed.state.ply,ready.ply+1,"투입은 한 수를 소비한다");
 });
 
 test("상대를 겨냥하는 제약 증강은 고른 기물에만 걸린다", () => {
@@ -1659,4 +1707,61 @@ test("은신·순간이동·봉화·천도는 고른 기물과 칸에만 적용�
   assert.equal(capital.accepted,true,"내 진영 빈칸으로 옮긴다");
   const capitalKing=capital.state.pieces.find(piece=>piece.side==="cho"&&piece.type==="gung")!;
   assert.deepEqual({x:capitalKing.x,y:capitalKing.y},{x:0,y:4},"고른 진영 칸으로 간다");
+});
+
+/** 초 궁·내시와 한 차만 남긴 판. 차는 궁을 직선으로 바로 잡을 수 있다. */
+function naesiStandoff(withEunuch:boolean){
+  const state=withAugment("naesi");
+  const guard=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="sa")!;
+  const transformed=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:guard.id},"cho");
+  assert.equal(transformed.accepted,true,"사를 내시로 바꾼다");
+  const king=transformed.state.pieces.find(piece=>piece.side==="cho"&&piece.type==="gung")!;
+  const cha=transformed.state.pieces.find(piece=>piece.side==="han"&&piece.type==="cha")!;
+  const enemyKing=transformed.state.pieces.find(piece=>piece.side==="han"&&piece.type==="gung")!;
+  const board:GameState={...transformed.state,turn:"han",winner:undefined,pieces:transformed.state.pieces.map(piece=>{
+    if(piece.id===king.id)return{...piece,x:4,y:1,captured:false};
+    if(piece.id===guard.id)return{...piece,x:3,y:0,captured:!withEunuch};
+    if(piece.id===cha.id)return{...piece,x:4,y:4,captured:false};
+    if(piece.id===enemyKing.id)return{...piece,x:4,y:8,captured:false};
+    return{...piece,captured:true};
+  })};
+  return{board,king,guard,cha};
+}
+
+test("내시는 궁이 잡힐 때 대신 잡히고 대국이 이어진다", () => {
+  const {board,king,guard,cha}=naesiStandoff(true);
+  const struck=reduceGame(board,{type:"MOVE_PIECE",pieceId:cha.id,to:{x:4,y:1}},"han");
+  assert.equal(struck.accepted,true,"차가 궁을 치러 간다");
+
+  assert.equal(struck.state.pieces.find(piece=>piece.id===guard.id)?.captured,true,"내시가 대신 잡힌다");
+  assert.equal(!!struck.state.pieces.find(piece=>piece.id===king.id)?.captured,false,"궁은 살아남는다");
+  assert.equal(struck.state.winner,undefined,"대국이 끝나지 않는다");
+  assert.equal(struck.state.endReason,undefined,"궁 포획으로 기록되지 않는다");
+  const attacker=struck.state.pieces.find(piece=>piece.id===cha.id)!;
+  assert.deepEqual({x:attacker.x,y:attacker.y},{x:4,y:4},"공격한 차는 제자리에 남는다");
+});
+
+test("내시가 이미 잡혔으면 궁이 잡혀 대국이 끝난다", () => {
+  const {board,king,cha}=naesiStandoff(false);
+  const struck=reduceGame(board,{type:"MOVE_PIECE",pieceId:cha.id,to:{x:4,y:1}},"han");
+  assert.equal(struck.accepted,true,"차가 궁을 잡는다");
+  assert.equal(struck.state.pieces.find(piece=>piece.id===king.id)?.captured,true,"궁이 잡힌다");
+  assert.equal(struck.state.winner,"han","궁을 잡은 쪽이 이긴다");
+  assert.equal(struck.state.endReason,"capture_king","궁 포획으로 끝난다");
+});
+
+test("내시는 한 번만 궁을 대신하고 그 뒤에는 궁이 잡힌다", () => {
+  const {board,king,guard,cha}=naesiStandoff(true);
+  const first=reduceGame(board,{type:"MOVE_PIECE",pieceId:cha.id,to:{x:4,y:1}},"han");
+  assert.equal(first.state.pieces.find(piece=>piece.id===guard.id)?.captured,true,"내시가 소진된다");
+
+  // 초가 한 수 두고 다시 한의 차례가 되면, 이번에는 막아 줄 내시가 없다.
+  // 궁이 차의 사선(4열)에 머무는 수를 골라 같은 위협을 다시 만든다.
+  const kingMove=legalMoves(first.state,king.id).find(square=>square.x===4)!;
+  const answered=reduceGame(first.state,{type:"MOVE_PIECE",pieceId:king.id,to:kingMove},"cho").state;
+  const target=answered.pieces.find(piece=>piece.id===king.id)!;
+  const second=reduceGame(answered,{type:"MOVE_PIECE",pieceId:cha.id,to:{x:target.x,y:target.y}},"han");
+  assert.equal(second.accepted,true,"차가 다시 궁을 친다");
+  assert.equal(second.state.pieces.find(piece=>piece.id===king.id)?.captured,true,"이번에는 궁이 잡힌다");
+  assert.equal(second.state.winner,"han","대국이 끝난다");
 });
