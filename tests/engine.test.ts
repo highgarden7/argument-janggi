@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { pieceArtPath } from "../app/art-assets";
-import { DRAFT_CLOCK_MS, INITIAL_CLOCK_MS, MOVE_INCREMENT_MS, Piece, canUseUibyeongRest, cardActivationKind, createGame, generatePieceMoves, hunsukkunDropTargets, isFrozenByMudang, jangdolbaengiDropTargets, legalMoves, migrateGameState, movePiece, myosupuriPlanningMoves, palaceLineTargets, projectGameView, reduceGame, restrictionTurnsRemaining, totalCost, trapTargets } from "../app/game/engine";
+import { DRAFT_SET_EXCLUSIVE_GROUPS, DRAFT_CLOCK_MS, INITIAL_CLOCK_MS, MOVE_INCREMENT_MS, Piece, canUseUibyeongRest, cardActivationKind, createGame, generatePieceMoves, hunsukkunDropTargets, isFrozenByMudang, jangdolbaengiDropTargets, drawCards, legalMoves, migrateGameState, movePiece, myosupuriPlanningMoves, palaceLineTargets, projectGameView, reduceGame, restrictionTurnsRemaining, totalCost, trapTargets } from "../app/game/engine";
 import { DRAW_REQUIREMENT_RULES } from "../app/game/draw-requirements";
 import cards from "../app/game/cards.json";
 
@@ -1332,4 +1332,107 @@ test("legacy local saves receive current schema metadata", () => {
   assert.equal(migrated.draftClockMs,DRAFT_CLOCK_MS);
   assert.equal(migrated.testMode,false);
   assert.equal(migrated.pieces.find(piece=>piece.side==="cho"&&piece.type==="gung")?.transformCardId,"hangu");
+});
+
+function withAugment(cardId:string,side:"cho"|"han"="cho"){
+  const base=createGame({cho:"귀마",han:"원앙마"},false,82,true);
+  const granted=reduceGame(base,{type:"TEST_GRANT_AUGMENT",side,cardId},side);
+  assert.equal(granted.accepted,true,cardId);
+  return granted.state;
+}
+
+test("도깨비는 착수한 뒤 한 턴 숨었다가 돌아오며 그 칸의 기물을 모두 잡는다", () => {
+  let state=withAugment("dokkaebi");
+  const horse=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="ma")!;
+  state=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:horse.id},"cho").state;
+  // 변신 직후에는 판 위에 그대로 남는다.
+  assert.equal(state.pieces.find(piece=>piece.id===horse.id)?.hidden,undefined);
+  assert.ok(legalMoves(state,horse.id).length>0);
+
+  state=reduceGame(state,{type:"MOVE_PIECE",pieceId:horse.id,to:legalMoves(state,horse.id)[0]},"cho").state;
+  const lair=state.pieces.find(piece=>piece.id===horse.id)!;
+  assert.equal(lair.hidden,true,"착수 직후에는 사라진다");
+
+  // 잠복한 칸에 적·아군 기물을 하나씩 올려둔다.
+  const enemy=state.pieces.find(piece=>piece.side==="han"&&piece.type==="jol")!;
+  const ally=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="jol")!;
+  const staged={...state,pieces:state.pieces.map(piece=>piece.id===enemy.id||piece.id===ally.id?{...piece,x:lair.x,y:lair.y}:{...piece})};
+  const mover=staged.pieces.find(piece=>piece.side==="han"&&piece.id!==enemy.id&&legalMoves(staged,piece.id).length>0)!;
+  const after=reduceGame(staged,{type:"MOVE_PIECE",pieceId:mover.id,to:legalMoves(staged,mover.id)[0]},"han").state;
+
+  assert.equal(after.turn,"cho");
+  assert.equal(after.pieces.find(piece=>piece.id===horse.id)?.hidden,false,"내 차례에 다시 나타난다");
+  assert.equal(after.pieces.find(piece=>piece.id===enemy.id)?.captured,true,"상대 기물을 잡는다");
+  assert.equal(after.pieces.find(piece=>piece.id===ally.id)?.captured,true,"아군 기물도 잡는다");
+});
+
+test("잠복한 도깨비 칸은 상대에게만 빈 칸으로 취급된다", () => {
+  const state=withAugment("dokkaebi");
+  const horse=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="ma")!;
+  const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:horse.id},"cho").state;
+  const cha=used.pieces.find(piece=>piece.side==="han"&&piece.type==="cha")!;
+  const board=(hidden:boolean)=>({...used,turn:"han" as const,pieces:used.pieces.map(piece=>{
+    if(piece.id===horse.id)return {...piece,x:3,y:2,hidden};
+    if(piece.id===cha.id)return {...piece,x:3,y:5};
+    if(piece.x===3&&piece.y<=4&&piece.id!==horse.id)return {...piece,captured:true};
+    return {...piece};
+  })});
+  const reach=(hidden:boolean)=>legalMoves(board(hidden),cha.id).filter(square=>square.x===3).map(square=>square.y);
+  assert.equal(reach(false).includes(1),false,"모습을 드러낸 도깨비는 길을 막는다");
+  assert.equal(reach(true).includes(1),true,"잠복 중에는 그 칸을 지나갈 수 있다");
+  assert.equal(reach(true).includes(2),true,"잠복 칸에 올라설 수 있다");
+});
+
+test("밀정은 상대에게 감춰지고 기물을 잡으면 정체가 드러난다", () => {
+  const state=withAugment("miljeong");
+  const rook=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="cha")!;
+  const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:rook.id},"cho").state;
+  const spy=used.pieces.find(piece=>piece.id===rook.id)!;
+  assert.equal(spy.hidden,true);
+  assert.equal(spy.transformCardId,"miljeong");
+  // 상대 시야에서는 사라지고, 내 시야에는 남는다.
+  assert.equal(projectGameView(used,"han").pieces.some(piece=>piece.id===rook.id),false);
+  assert.equal(projectGameView(used,"cho").pieces.some(piece=>piece.id===rook.id),true);
+
+  // 잡을 상대 기물을 바로 앞에 놓는다.
+  const victim=used.pieces.find(piece=>piece.side==="han"&&piece.type==="jol")!;
+  // 변신한 턴에는 잡을 수 없으므로(captureLockedPly) 한 수 뒤 상황으로 옮긴다.
+  const staged={...used,ply:used.ply+2,pieces:used.pieces.map(piece=>{
+    if(piece.id===rook.id)return {...piece,x:4,y:4};
+    if(piece.id===victim.id)return {...piece,x:4,y:5};
+    if(piece.x===4&&piece.y>=4&&piece.y<=5&&piece.id!==rook.id&&piece.id!==victim.id)return {...piece,captured:true};
+    return {...piece};
+  })};
+  const after=reduceGame(staged,{type:"MOVE_PIECE",pieceId:rook.id,to:{x:4,y:5}},"cho").state;
+  const revealed=after.pieces.find(piece=>piece.id===rook.id)!;
+  assert.equal(after.pieces.find(piece=>piece.id===victim.id)?.captured,true);
+  assert.equal(revealed.hidden,false,"잡는 순간 정체가 드러난다");
+  assert.equal(revealed.transformCardId,undefined,"이후에는 일반 차가 된다");
+  assert.equal(projectGameView(after,"han").pieces.some(piece=>piece.id===rook.id),true);
+});
+
+test("기권하면 자기 차례가 아니어도 상대의 승리로 끝난다", () => {
+  const state=createGame({cho:"귀마",han:"원앙마"},false,7);
+  assert.equal(state.turn,"cho");
+  const transition=reduceGame(state,{type:"RESIGN"},"han");
+  assert.equal(transition.accepted,true);
+  assert.equal(transition.state.winner,"cho");
+  assert.equal(transition.state.endReason,"resign");
+  assert.equal(reduceGame(transition.state,{type:"RESIGN"},"cho").accepted,false,"끝난 대국에는 다시 기권할 수 없다");
+});
+
+test("항우와 유방은 한 선택 화면에 함께 오르지 않는다", () => {
+  assert.deepEqual(DRAFT_SET_EXCLUSIVE_GROUPS,[["hangu","yubang"]]);
+  let together=0,hangu=0,yubang=0;
+  for(let seed=1;seed<=900;seed++){
+    const state=createGame({cho:"귀마",han:"원앙마"},true,seed);
+    for(const slot of [0,1,2] as const)for(const side of ["cho","han"] as const){
+      const set=drawCards(state,side,slot);
+      if(set.includes("hangu"))hangu++;
+      if(set.includes("yubang"))yubang++;
+      if(set.includes("hangu")&&set.includes("yubang"))together++;
+    }
+  }
+  assert.ok(hangu>0&&yubang>0,"두 카드 모두 후보에 오르기는 한다");
+  assert.equal(together,0);
 });

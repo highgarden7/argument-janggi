@@ -32,7 +32,7 @@ const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const FORMATIONS = new Set<Formation>(["귀마", "원앙마", "면상", "양귀마"]);
 const COMMAND_TYPES = new Set([
   "MOVE_PIECE", "USE_UIBYEONG_REST", "DEPLOY_JANGDOLBAENGI_RESERVE", "DEPLOY_HUNSUKKUN_RESERVE",
-  "PICK_AUGMENT", "USE_AUGMENT",
+  "PICK_AUGMENT", "USE_AUGMENT", "RESIGN",
 ]);
 
 function json(data: unknown, status = 200): Response {
@@ -117,8 +117,8 @@ function roomView(row: RoomRow, role: RoomRole, game = parseGame(row)): RoomView
     hostSide: row.host_side ?? undefined,
     sideChoice: row.side_choice,
     augments: !!row.augments,
-    host: { nickname: row.host_name, ready: !!row.host_ready, formation: row.host_formation },
-    guest: row.guest_name ? { nickname: row.guest_name, ready: !!row.guest_ready, formation: row.guest_formation } : undefined,
+    host: { nickname: row.host_name, ready: !!row.host_ready, formation: role === "host" ? row.host_formation : undefined },
+    guest: row.guest_name ? { nickname: row.guest_name, ready: !!row.guest_ready, formation: role === "guest" ? row.guest_formation : undefined } : undefined,
     draftSide: game?.draft?.side,
     game: game && playerSide ? projectGameView(game, playerSide) : undefined,
   };

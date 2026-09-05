@@ -399,24 +399,26 @@ export function legalMoves(state:GameState,pieceId:string){
   const mountedSoldier=!!piece?.carriedBy&&piece.type==="jol"&&yeokmachaActive&&ridingHost?.type==="ma";
   const towerPassenger=!!piece?.carriedBy&&ridingHost?.transformCardId==="gongseongtap";
   if(!piece||piece.carriedBy&&!mountedSoldier&&!towerPassenger||piece.side!==state.turn||isFrozenByMudang(state,pieceId))return[];
-  let moves=generatePieceMoves(state.pieces,piece,getModifiers(state,piece)).filter(square=>naesiCanFollow(state,piece,square));
+  // 사라진 도깨비가 선 칸은 상대에게 빈 칸으로 취급된다.
+  const board=state.pieces.filter(candidate=>!(candidate.hidden&&candidate.transformCardId==="dokkaebi"&&candidate.side!==piece.side));
+  let moves=generatePieceMoves(board,piece,getModifiers(state,piece)).filter(square=>naesiCanFollow(state,piece,square));
   const carriedPassenger=piece.transformCardId==="gongseongtap"
     ?state.pieces.find(candidate=>!candidate.captured&&candidate.carriedBy===piece.id)
     :undefined;
   if(piece.transformCardId==="gongseongtap"&&!carriedPassenger){
     for(const ally of state.pieces.filter(candidate=>!candidate.captured&&!candidate.carriedBy&&candidate.side===piece.side&&candidate.id!==piece.id&&candidate.type!=="gung"&&candidate.transformCardId!=="gongseongtap")){
-      const boardWithoutAlly=state.pieces.filter(candidate=>candidate.id!==ally.id);
+      const boardWithoutAlly=board.filter(candidate=>candidate.id!==ally.id);
       if(generatePieceMoves(boardWithoutAlly,piece,getModifiers(state,piece)).some(square=>same(square,ally)))moves.push({x:ally.x,y:ally.y});
     }
   }else if(!piece.carriedBy&&piece.type!=="gung"&&piece.transformCardId!=="gongseongtap"){
     for(const tower of state.pieces.filter(candidate=>!candidate.captured&&!candidate.carriedBy&&candidate.side===piece.side&&candidate.transformCardId==="gongseongtap"&&!state.pieces.some(passenger=>!passenger.captured&&passenger.carriedBy===candidate.id))){
-      const boardWithoutTower=state.pieces.filter(candidate=>candidate.id!==tower.id);
+      const boardWithoutTower=board.filter(candidate=>candidate.id!==tower.id);
       if(generatePieceMoves(boardWithoutTower,piece,getModifiers(state,piece)).some(square=>same(square,tower)))moves.push({x:tower.x,y:tower.y});
     }
   }
   if(piece.type==="jol"&&!piece.carriedBy&&yeokmachaActive){
     for(const horse of state.pieces.filter(candidate=>!candidate.captured&&!candidate.carriedBy&&candidate.side===piece.side&&candidate.type==="ma"&&!state.pieces.some(passenger=>!passenger.captured&&passenger.carriedBy===candidate.id))){
-      const boardWithoutHorse=state.pieces.filter(candidate=>candidate.id!==horse.id);
+      const boardWithoutHorse=board.filter(candidate=>candidate.id!==horse.id);
       if(generatePieceMoves(boardWithoutHorse,piece,getModifiers(state,piece)).some(square=>same(square,horse)))moves.push({x:horse.x,y:horse.y});
     }
   }
@@ -463,7 +465,9 @@ export function jangdolbaengiDropTargets(state:GameState,side:Side):Square[]{
 
 function seededRandom(seed:number){let value=seed>>>0||0x9e3779b9;return()=>{value^=value<<13;value^=value>>>17;value^=value<<5;return(value>>>0)/4294967296}}
 function weightedPick(pool:Card[],used:Set<string>,random:()=>number){const choices=pool.filter(c=>!used.has(c.id));const total=choices.reduce((n,c)=>n+(c.cost<=2.5?9:14-c.cost*2),0);let r=random()*total;for(const c of choices){r-=c.cost<=2.5?9:14-c.cost*2;if(r<=0)return c}return choices[0]}
-export function drawCards(state:GameState,side:Side,slot:DraftSlot):string[]{const held=new Set([...state.cards.cho,...state.cards.han].map(c=>c.cardId));const own=state.cards[side].map(c=>CARD_BY_ID[c.cardId]);const pool=CARDS.filter(c=>!held.has(c.id)&&meetsDrawRequirement({state,side,slot,movesFor:(piece)=>generatePieceMoves(state.pieces,piece,getModifiers(state,piece))},c.draw)&&!own.some(h=>h.exclusive?.includes(c.id)||c.exclusive?.includes(h.id)));const random=seededRandom(state.rngSeed^(side==="cho"?0x43484f:0x48414e)^(slot+1)*0x45d9f3b^state.fullMove);const target=[2,3,3.5][slot];let best:Card[]=[];let gap=99;for(let attempt=0;attempt<3;attempt++){const set:Card[]=[];const used=new Set<string>();while(set.length<3&&used.size<pool.length){const c=weightedPick(pool,used,random);if(!c)break;used.add(c.id);set.push(c)}const g=Math.abs(set.reduce((n,c)=>n+c.cost,0)/Math.max(1,set.length)-target);if(g<gap){best=set;gap=g}if(g<1)break}return best.map(c=>c.id)}
+/** 한 선택 화면에 함께 오르지 않는 조합. 대국 전체에는 둘 다 등장할 수 있다. */
+export const DRAFT_SET_EXCLUSIVE_GROUPS:string[][]=[["hangu","yubang"]];
+export function drawCards(state:GameState,side:Side,slot:DraftSlot):string[]{const held=new Set([...state.cards.cho,...state.cards.han].map(c=>c.cardId));const own=state.cards[side].map(c=>CARD_BY_ID[c.cardId]);const pool=CARDS.filter(c=>!held.has(c.id)&&meetsDrawRequirement({state,side,slot,movesFor:(piece)=>generatePieceMoves(state.pieces,piece,getModifiers(state,piece))},c.draw)&&!own.some(h=>h.exclusive?.includes(c.id)||c.exclusive?.includes(h.id)));const random=seededRandom(state.rngSeed^(side==="cho"?0x43484f:0x48414e)^(slot+1)*0x45d9f3b^state.fullMove);const target=[2,3,3.5][slot];let best:Card[]=[];let gap=99;for(let attempt=0;attempt<3;attempt++){const set:Card[]=[];const used=new Set<string>();while(set.length<3&&used.size<pool.length){const c=weightedPick(pool,used,random);if(!c)break;used.add(c.id);for(const group of DRAFT_SET_EXCLUSIVE_GROUPS)if(group.includes(c.id))for(const peer of group)used.add(peer);set.push(c)}const g=Math.abs(set.reduce((n,c)=>n+c.cost,0)/Math.max(1,set.length)-target);if(g<gap){best=set;gap=g}if(g<1)break}return best.map(c=>c.id)}
 
 function openDraft(state:GameState,side:Side,slot:DraftSlot,queue:Side[]):GameState{return{...state,phase:"DRAFT",draftClockMs:DRAFT_CLOCK_MS,draft:{side,slot,choices:drawCards(state,side,slot),queue}}}
 
@@ -654,7 +658,8 @@ function applyActivateCard(state:GameState,side:Side,index:number,targetPieceId?
     if(card.id==="uibyeong")target.growth=0;
     if(card.id==="guksa"){target.guksaWait=0;target.guksaRevived=false}
     if(card.id==="hongipo")target.ammo=3;
-    if(card.id==="miljeong"||card.id==="dokkaebi")target.hidden=true;
+    // 도깨비는 변신 직후에는 판 위에 남고, 착수한 뒤에야 한 턴 사라진다.
+    if(card.id==="miljeong")target.hidden=true;
     const cards={...state.cards,[side]:state.cards[side].map((row,i)=>i===index?{...row,state:"used" as CardState,targetPieceId}:row)};
     return {...state,pieces,cards,deathmatchClock:state.deathmatch?0:state.deathmatchClock};
   }
@@ -701,6 +706,11 @@ function stampTransition(previous:GameState,next:GameState,events:GameEvent[]):G
 /** The only public state-transition entry point used by the application UI. */
 export function reduceGame(state:GameState,command:GameCommand,actor:Side):GameTransition {
   if(state.winner||state.phase==="ENDED")return rejected(state,"GAME_ENDED","이미 종료된 대국입니다.");
+
+  // 기권은 자기 차례가 아니어도, 증강 선택 중에도 낼 수 있다.
+  if(command.type==="RESIGN"){
+    return stampTransition(state,{...state,winner:opponent(actor),endReason:"resign",draft:undefined},[]);
+  }
 
   if(command.type==="ADVANCE_CLOCK"){
     const elapsedMs=Math.max(0,Math.floor(command.elapsedMs));

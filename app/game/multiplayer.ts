@@ -14,8 +14,9 @@ export type RoomView = {
   hostSide?: Side;
   sideChoice: RoomSideChoice;
   augments: boolean;
-  host: { nickname: string; ready: boolean; formation: Formation };
-  guest?: { nickname: string; ready: boolean; formation: Formation };
+  /** `formation`은 본인 것만 채워진다. 상대 포진은 대국이 시작될 때까지 감춘다. */
+  host: { nickname: string; ready: boolean; formation?: Formation };
+  guest?: { nickname: string; ready: boolean; formation?: Formation };
   draftSide?: Side;
   game?: GameState;
 };

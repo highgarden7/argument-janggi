@@ -76,6 +76,34 @@ export function finishAction(
     if (piece.side === nextTurn && piece.shielded && piece.shielded > 0) piece.shielded -= 1;
   }
 
+  // 밀정은 기물을 잡는 순간 정체가 드러나고 평범한 차로 돌아간다.
+  if (mover.transformCardId === "miljeong" && (captured?.captured || capturedPieces.length)) {
+    const spy = pieces.find((piece) => piece.id === mover.id);
+    if (spy) { spy.hidden = false; spy.transformCardId = undefined; }
+  }
+
+  // 도깨비는 착수 직후 사라졌다가, 자기 차례가 돌아오면 그 칸의 모든 기물을 잡고 나타난다.
+  const returningDokkaebi = pieces.filter((piece) =>
+    !piece.captured && piece.hidden && piece.transformCardId === "dokkaebi" && piece.side === nextTurn);
+  const dokkaebiCaptures: Piece[] = [];
+  for (const dokkaebi of returningDokkaebi) {
+    dokkaebi.hidden = false;
+    for (const victim of pieces) {
+      if (victim.id === dokkaebi.id || victim.captured || victim.carriedBy) continue;
+      if (victim.x !== dokkaebi.x || victim.y !== dokkaebi.y) continue;
+      victim.captured = true;
+      dokkaebiCaptures.push(victim);
+    }
+  }
+  if (mover.transformCardId === "dokkaebi") {
+    const vanishing = pieces.find((piece) => piece.id === mover.id);
+    if (vanishing && !vanishing.captured) vanishing.hidden = true;
+  }
+  if (!winner) {
+    const fallenKing = dokkaebiCaptures.find((piece) => piece.type === "gung");
+    if (fallenKing) { winner = opponent(fallenKing.side); endReason = "capture_king"; }
+  }
+
   for (const restriction of state.restrictions.filter(
     (row) => row.cardId === "talyeong" && row.side === mover.side,
   )) {
@@ -125,7 +153,7 @@ export function finishAction(
         from,
         to,
         capturedId: captured?.captured ? captured.id : undefined,
-        capturedIds: capturedPieces.map((piece) => piece.id),
+        capturedIds: [...capturedPieces, ...dokkaebiCaptures].map((piece) => piece.id),
       },
     ],
     walls: state.walls.map((wall) => ({ ...wall, remaining: wall.remaining - 1 })).filter((wall) => wall.remaining > 1),

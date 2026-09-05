@@ -168,7 +168,9 @@ test("each player picks their own formation and it reaches the started board", a
   // 참가자도 자기 포진은 직접 정한다. 방 설정과 달리 방장 전용이 아니다.
   const guestSet = await (await api(db, `/api/rooms/${code}/formation`, "PATCH", joined.token, { formation: "양귀마" })).json() as { room: RoomView };
   assert.equal(guestSet.room.guest?.formation, "양귀마");
-  assert.equal(guestSet.room.host.formation, "면상");
+  // 상대 포진은 대국 시작 전까지 응답에 실리지 않는다.
+  assert.equal(guestSet.room.host.formation, undefined);
+  assert.equal(hostSet.room.guest?.formation, undefined);
 
   // 포진을 바꾸면 본인 준비가 풀린다.
   await api(db, `/api/rooms/${code}/ready`, "POST", created.token, { ready: true });

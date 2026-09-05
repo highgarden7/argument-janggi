@@ -10,7 +10,7 @@ export type Formation = "귀마" | "원앙마" | "면상" | "양귀마";
 export type Category = "TRANSFORM" | "PROMOTION" | "OPENING" | "ACTIVE" | "PALACE" | "ANOMALY" | "RESTRICT";
 export type CardState = "ready" | "active" | "used" | "inert";
 export type GamePhase = "DRAFT" | "ACTION" | "ENDED";
-export type EndReason = "capture_king" | "special_victory" | "judgment" | "deathmatch" | "timeout";
+export type EndReason = "capture_king" | "special_victory" | "judgment" | "deathmatch" | "timeout" | "resign";
 export type DraftSlot = 0 | 1 | 2;
 export type DrawRequirement =
   | "ANY"
@@ -164,7 +164,8 @@ export type GameCommand =
   | { type: "PICK_AUGMENT"; cardId: string }
   | { type: "TEST_GRANT_AUGMENT"; side: Side; cardId: string }
   | { type: "USE_AUGMENT"; cardIndex: number; targetPieceId?: string; targetSquare?: Square; targetLine?: Square[]; targetSquares?: Square[] }
-  | { type: "ADVANCE_CLOCK"; elapsedMs: number };
+  | { type: "ADVANCE_CLOCK"; elapsedMs: number }
+  | { type: "RESIGN" };
 
 export type GameEvent =
   | { type: "PIECE_MOVED"; side: Side; pieceId: string; from: Square; to: Square }
