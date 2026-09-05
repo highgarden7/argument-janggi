@@ -435,8 +435,21 @@
   filter: drop-shadow(0 3px 3px rgba(30, 27, 22, .3));
 }
 
-.piece.hidden {
+/* 은신 기물. 클래스명을 tailwind의 .hidden 유틸리티와 겹치지 않게 둔다. */
+.piece.concealed {
   opacity: .47;
+}
+
+.piece.concealed .piece-art {
+  filter: grayscale(.35);
+}
+
+.piece.concealed .selection-ring {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 3;
+  stroke-dasharray: 7 6;
+  opacity: .85;
 }
 
 .piece.augment-ineligible .piece-art {
