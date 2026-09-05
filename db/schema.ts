@@ -8,6 +8,8 @@ export const rooms = sqliteTable("rooms", {
   guestName: text("guest_name"),
   sideChoice: text("side_choice", { enum: ["cho", "han", "random"] }).notNull().default("random"),
   hostSide: text("host_side", { enum: ["cho", "han"] }),
+  hostFormation: text("host_formation", { enum: ["귀마", "원앙마", "면상", "양귀마"] }).notNull().default("귀마"),
+  guestFormation: text("guest_formation", { enum: ["귀마", "원앙마", "면상", "양귀마"] }).notNull().default("귀마"),
   augments: integer("augments", { mode: "boolean" }).notNull().default(true),
   hostReady: integer("host_ready", { mode: "boolean" }).notNull().default(false),
   guestReady: integer("guest_ready", { mode: "boolean" }).notNull().default(false),

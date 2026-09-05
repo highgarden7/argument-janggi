@@ -1,4 +1,4 @@
-import type { GameCommand, GameState, Side } from "./model";
+import type { Formation, GameCommand, GameState, Side } from "./model";
 
 export type RoomSideChoice = Side | "random";
 export type RoomStatus = "waiting" | "playing" | "finished";
@@ -14,8 +14,8 @@ export type RoomView = {
   hostSide?: Side;
   sideChoice: RoomSideChoice;
   augments: boolean;
-  host: { nickname: string; ready: boolean };
-  guest?: { nickname: string; ready: boolean };
+  host: { nickname: string; ready: boolean; formation: Formation };
+  guest?: { nickname: string; ready: boolean; formation: Formation };
   draftSide?: Side;
   game?: GameState;
 };

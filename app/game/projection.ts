@@ -1,8 +1,9 @@
 import type { GameState, Side } from "./model";
 
 /**
- * Creates a player-facing allow-list view. Hidden opponent pieces and another
- * player's private draft choices never reach board/UI consumers.
+ * Creates a player-facing allow-list view. Hidden opponent pieces never reach
+ * board/UI consumers. Draft candidates are shared with both players by design,
+ * so each side can follow the opponent's augment pick as it happens.
  */
 export function projectGameView(state: GameState, viewer: Side): GameState {
   return {
@@ -26,7 +27,7 @@ export function projectGameView(state: GameState, viewer: Side): GameState {
       cho: state.cards.cho.map((card) => ({ ...card })),
       han: state.cards.han.map((card) => ({ ...card })),
     },
-    draft: state.draft?.side === viewer
+    draft: state.draft
       ? { ...state.draft, choices: [...state.draft.choices], queue: [...state.draft.queue] }
       : undefined,
     augments: state.augments,

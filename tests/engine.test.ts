@@ -1263,14 +1263,17 @@ test("finite restrictions remain active with a countdown and receive the used st
   assert.equal(state.cards.cho[0].state,"used");
 });
 
-test("player projection removes hidden enemy pieces and private draft choices", () => {
+test("player projection removes hidden enemy pieces but shares draft candidates", () => {
   const state=createGame({cho:"귀마",han:"원앙마"},true,42);
   state.jeokgi=[{x:4,y:3,side:"cho"}];
   const enemy=state.pieces.find(piece=>piece.side==="han"&&piece.type==="jol")!;
   enemy.hidden=true;
   const hanView=projectGameView({...state,draft:{...state.draft!,side:"cho"}},"han");
   assert.equal(hanView.pieces.some(piece=>piece.id===enemy.id),true);
-  assert.equal(hanView.draft,undefined);
+  // 상대가 고르는 후보도 함께 보여주되, 원본 배열을 공유하지는 않는다.
+  assert.deepEqual(hanView.draft?.choices,state.draft?.choices);
+  assert.notEqual(hanView.draft?.choices,state.draft?.choices);
+  assert.equal(hanView.draft?.side,"cho");
   const choView=projectGameView(state,"cho");
   assert.equal(choView.pieces.some(piece=>piece.id===enemy.id),false);
   assert.deepEqual(choView.draft?.choices,state.draft?.choices);

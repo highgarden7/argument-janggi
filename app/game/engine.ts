@@ -339,9 +339,10 @@ export function generatePieceMoves(board:Piece[],piece:Piece,mods:MoveModifiers)
   return unique;
 }
 
-const FORMATIONS:Record<Formation,[PieceType,PieceType,PieceType,PieceType]>={"귀마":["sang","ma","ma","sang"],"원앙마":["ma","sang","ma","sang"],"면상":["sang","ma","sang","ma"],"양귀마":["ma","sang","sang","ma"]};
+/** Back-rank 마·상 order at files 2·3·7·8. The UI labels formations from this table. */
+export const FORMATION_BACK_RANK:Record<Formation,[PieceType,PieceType,PieceType,PieceType]>={"귀마":["sang","ma","ma","sang"],"원앙마":["ma","sang","ma","sang"],"면상":["sang","ma","sang","ma"],"양귀마":["ma","sang","sang","ma"]};
 function initialPieces(formations:Record<Side,Formation>):Piece[]{ const pieces:Piece[]=[]; let id=0; const add=(side:Side,type:PieceType,x:number,y:number)=>pieces.push({id:`p${++id}`,side,type,x,y});
-  for(const side of ["cho","han"] as Side[]){const y=side==="cho"?0:9, back=FORMATIONS[formations[side]];add(side,"cha",0,y);add(side,back[0],1,y);add(side,back[1],2,y);add(side,"sa",3,y);add(side,"sa",5,y);add(side,back[2],6,y);add(side,back[3],7,y);add(side,"cha",8,y);add(side,"gung",4,side==="cho"?1:8);add(side,"po",1,side==="cho"?2:7);add(side,"po",7,side==="cho"?2:7);for(const x of [0,2,4,6,8])add(side,"jol",x,side==="cho"?3:6)} return pieces; }
+  for(const side of ["cho","han"] as Side[]){const y=side==="cho"?0:9, back=FORMATION_BACK_RANK[formations[side]];add(side,"cha",0,y);add(side,back[0],1,y);add(side,back[1],2,y);add(side,"sa",3,y);add(side,"sa",5,y);add(side,back[2],6,y);add(side,back[3],7,y);add(side,"cha",8,y);add(side,"gung",4,side==="cho"?1:8);add(side,"po",1,side==="cho"?2:7);add(side,"po",7,side==="cho"?2:7);for(const x of [0,2,4,6,8])add(side,"jol",x,side==="cho"?3:6)} return pieces; }
 export function createGame(formations:Record<Side,Formation>,augments:boolean,seed=0x0a11ce,testMode=false):GameState {
   let state:GameState={schemaVersion:GAME_SCHEMA_VERSION,rulesetVersion:RULESET_VERSION,revision:0,eventSequence:0,rngSeed:seed>>>0,phase:"ACTION",pieces:initialPieces(formations),turn:"cho",clocks:{cho:INITIAL_CLOCK_MS,han:INITIAL_CLOCK_MS},draftClockMs:DRAFT_CLOCK_MS,ply:0,fullMove:0,cards:{cho:[],han:[]},augments,testMode,moves:[],restrictions:[],walls:[],palaceStructures:[],traps:[],jeokgi:[],reserves:{cho:[],han:[]},waitingPieces:{cho:[],han:[]},myosupuriPlans:{},deathmatch:false,deathmatchClock:0,formations};
   if(augments)state=openDraft(state,"cho",0,["han"]);

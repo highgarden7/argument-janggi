@@ -1,6 +1,6 @@
 import { createGame, migrateGameState, projectGameView, reduceGame } from "../app/game/engine";
 import { opponent } from "../app/game/model";
-import type { GameCommand, GameState, Side } from "../app/game/model";
+import type { Formation, GameCommand, GameState, Side } from "../app/game/model";
 import type { RoomRole, RoomSideChoice, RoomView } from "../app/game/multiplayer";
 
 type RoomEnv = { DB: D1Database };
@@ -12,6 +12,8 @@ type RoomRow = {
   guest_name: string | null;
   side_choice: RoomSideChoice;
   host_side: Side | null;
+  host_formation: Formation;
+  guest_formation: Formation;
   augments: number;
   host_ready: number;
   guest_ready: number;
@@ -27,6 +29,7 @@ type RoomRow = {
 
 const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const FORMATIONS = new Set<Formation>(["귀마", "원앙마", "면상", "양귀마"]);
 const COMMAND_TYPES = new Set([
   "MOVE_PIECE", "USE_UIBYEONG_REST", "DEPLOY_JANGDOLBAENGI_RESERVE", "DEPLOY_HUNSUKKUN_RESERVE",
   "PICK_AUGMENT", "USE_AUGMENT",
@@ -114,8 +117,8 @@ function roomView(row: RoomRow, role: RoomRole, game = parseGame(row)): RoomView
     hostSide: row.host_side ?? undefined,
     sideChoice: row.side_choice,
     augments: !!row.augments,
-    host: { nickname: row.host_name, ready: !!row.host_ready },
-    guest: row.guest_name ? { nickname: row.guest_name, ready: !!row.guest_ready } : undefined,
+    host: { nickname: row.host_name, ready: !!row.host_ready, formation: row.host_formation },
+    guest: row.guest_name ? { nickname: row.guest_name, ready: !!row.guest_ready, formation: row.guest_formation } : undefined,
     draftSide: game?.draft?.side,
     game: game && playerSide ? projectGameView(game, playerSide) : undefined,
   };
@@ -193,6 +196,22 @@ async function updateSettings(request: Request, env: RoomEnv, row: RoomRow, role
   return updated ? json({ room: roomView(updated, role) }) : error("방 설정을 저장하지 못했습니다.", 500);
 }
 
+/** Each player owns their own formation, so a change only clears that player's ready flag. */
+async function updateFormation(request: Request, env: RoomEnv, row: RoomRow, role: RoomRole): Promise<Response> {
+  if (row.status !== "waiting") return error("대기실에서만 포진을 변경할 수 있습니다.", 409);
+  const payload = await body<{ formation?: unknown }>(request);
+  const formation = payload?.formation as Formation;
+  if (!FORMATIONS.has(formation)) return error("귀마·원앙마·면상·양귀마 중 하나를 선택하세요.");
+  const column = role === "host" ? "host_formation" : "guest_formation";
+  const readyColumn = role === "host" ? "host_ready" : "guest_ready";
+  const now = Date.now();
+  const result = await env.DB.prepare(`UPDATE rooms SET ${column} = ?, ${readyColumn} = 0, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ?`)
+    .bind(formation, now, now + ROOM_TTL_MS, row.code, row.revision).run();
+  if ((result.meta.changes ?? 0) !== 1) return error("방 상태가 갱신되었습니다. 다시 시도하세요.", 409);
+  const updated = await readRoom(env.DB, row.code);
+  return updated ? json({ room: roomView(updated, role) }) : error("포진을 저장하지 못했습니다.", 500);
+}
+
 async function setReady(request: Request, env: RoomEnv, row: RoomRow, role: RoomRole): Promise<Response> {
   if (row.status !== "waiting") return error("이미 대국이 시작되었습니다.", 409);
   const payload = await body<{ ready?: unknown }>(request);
@@ -206,7 +225,10 @@ async function setReady(request: Request, env: RoomEnv, row: RoomRow, role: Room
   if (!updated) return error("방을 불러오지 못했습니다.", 500);
   if (updated.host_ready && updated.guest_ready && updated.guest_name) {
     const hostSide: Side = updated.side_choice === "random" ? (crypto.getRandomValues(new Uint8Array(1))[0] % 2 ? "cho" : "han") : updated.side_choice;
-    const game = createGame({ cho: "귀마", han: "원앙마" }, !!updated.augments, randomSeed());
+    const formations: Record<Side, Formation> = hostSide === "cho"
+      ? { cho: updated.host_formation, han: updated.guest_formation }
+      : { cho: updated.guest_formation, han: updated.host_formation };
+    const game = createGame(formations, !!updated.augments, randomSeed());
     const started = await env.DB.prepare("UPDATE rooms SET host_side = ?, status = 'playing', game_json = ?, match_number = match_number + 1, action_started_at = ?, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ? AND host_ready = 1 AND guest_ready = 1")
       .bind(hostSide, JSON.stringify(game), now, now, now + ROOM_TTL_MS, updated.code, updated.revision).run();
     if ((started.meta.changes ?? 0) === 1) updated = (await readRoom(env.DB, row.code)) ?? updated;
@@ -248,7 +270,7 @@ async function returnToLobby(env: RoomEnv, row: RoomRow, role: RoomRole): Promis
 export async function handleRoomRequest(request: Request, env: RoomEnv): Promise<Response | null> {
   const url = new URL(request.url);
   if (url.pathname === "/api/rooms" && request.method === "POST") return createRoom(request, env);
-  const match = url.pathname.match(/^\/api\/rooms\/([A-Z2-9]{6})(?:\/(join|settings|ready|command|lobby))?$/i);
+  const match = url.pathname.match(/^\/api\/rooms\/([A-Z2-9]{6})(?:\/(join|settings|formation|ready|command|lobby))?$/i);
   if (!match) return url.pathname.startsWith("/api/rooms") ? error("요청한 방 기능을 찾을 수 없습니다.", 404) : null;
   const code = match[1].toUpperCase();
   const action = match[2];
@@ -259,6 +281,7 @@ export async function handleRoomRequest(request: Request, env: RoomEnv): Promise
   if (!role) return error("방 입장 정보가 올바르지 않습니다.", 401);
   if (!action && request.method === "GET") return getRoom(request, env, code);
   if (action === "settings" && request.method === "PATCH") return updateSettings(request, env, row, role);
+  if (action === "formation" && request.method === "PATCH") return updateFormation(request, env, row, role);
   if (action === "ready" && request.method === "POST") return setReady(request, env, row, role);
   if (action === "command" && request.method === "POST") return submitCommand(request, env, row, role);
   if (action === "lobby" && request.method === "POST") return returnToLobby(env, row, role);

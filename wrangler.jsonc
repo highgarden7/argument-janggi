@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "augment-janggi",
+  "name": "janggi",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-05-15",
   "compatibility_flags": ["nodejs_compat"],
@@ -8,7 +8,7 @@
     {
       "binding": "DB",
       "database_name": "augment-janggi-db",
-      "database_id": "00000000-0000-4000-8000-000000000000",
+      "database_id": "a5b9f132-cbdc-4408-b228-76ed81bef612",
       "migrations_dir": ".openai/drizzle"
     }
   ],
