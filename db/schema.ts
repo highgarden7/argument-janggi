@@ -22,3 +22,10 @@ export const rooms = sqliteTable("rooms", {
   updatedAt: integer("updated_at").notNull(),
   expiresAt: integer("expires_at").notNull(),
 }, (table) => [index("idx_rooms_expires_at").on(table.expiresAt)]);
+
+export const feedback = sqliteTable("feedback", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [index("idx_feedback_created_at").on(table.createdAt)]);

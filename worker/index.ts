@@ -2,6 +2,7 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import { handleRoomRequest } from "./rooms";
+import { handleFeedbackRequest } from "./feedback";
 
 interface Env {
   ASSETS: Fetcher;
@@ -32,6 +33,11 @@ const worker = {
 
     if (url.pathname.startsWith("/api/rooms")) {
       const response = await handleRoomRequest(request, env);
+      if (response) return response;
+    }
+
+    if (url.pathname.startsWith("/api/feedback") || url.pathname.startsWith("/api/admin/feedback")) {
+      const response = await handleFeedbackRequest(request, env);
       if (response) return response;
     }
 

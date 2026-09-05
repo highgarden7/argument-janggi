@@ -50,3 +50,27 @@ button{touch-action:manipulation}
   .lobby-room-actions strong{margin-top:6px}
   .lobby-note{font-size:11px;line-height:1.5}
 }
+
+.lobby-feedback{display:block;width:100%;margin-top:14px;padding:9px;border:1px solid #cfc8bb;background:transparent;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer}
+.lobby-feedback:hover{color:var(--ink);border-color:#b9b2a5}
+.room-field textarea{width:100%;min-height:120px;padding:10px 13px;border:1px solid #bdb5a8;background:#fffdf8;color:var(--ink);font:14px inherit;line-height:1.6;resize:vertical}
+.room-connection-note.error{color:var(--red)}
+
+.admin-shell{min-height:100dvh;padding:clamp(24px,5vw,56px) 20px;background:var(--paper)}
+.admin-card{width:min(760px,100%);margin:0 auto;padding:32px;border:1px solid var(--line,#c7c0b4);background:var(--surface,#fbfaf6);box-shadow:0 24px 70px rgba(20,27,24,.14)}
+.admin-lock{width:min(360px,100%);margin:12vh auto 0;padding:32px;border:1px solid #c7c0b4;background:#fbfaf6;box-shadow:0 24px 70px rgba(20,27,24,.14);text-align:center}
+.admin-lock h1{font-size:1.4rem;margin:6px 0 18px}
+.admin-lock form{display:grid;gap:10px}
+.admin-lock input{width:100%;min-height:46px;padding:0 13px;border:1px solid #bdb5a8;background:#fffdf8;color:var(--ink);font:14px inherit;text-align:center}
+.admin-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #d8d1c5}
+.admin-header h1{margin:2px 0 0;font-size:1.6rem}
+.admin-list{display:grid;gap:0;border:1px solid #d8d1c5}
+.admin-list button{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:10px;width:100%;padding:14px 16px;border:0;border-bottom:1px solid #e4dfd4;background:transparent;text-align:left;cursor:pointer}
+.admin-list button:last-child{border-bottom:0}
+.admin-list button:hover{background:#f3efe6}
+.admin-list button strong{font-size:14px}
+.admin-list button time{color:var(--muted);font-size:11px;white-space:nowrap}
+.admin-empty{padding:40px 0;color:var(--muted);text-align:center}
+.admin-detail-modal{width:min(560px,100%)}
+.admin-detail-modal time{display:block;margin-bottom:14px;color:var(--muted);font-size:11px}
+.admin-detail-modal p{white-space:pre-wrap;line-height:1.7}
