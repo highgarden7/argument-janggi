@@ -43,11 +43,11 @@ test("publishes the project SVG as the browser favicon", async () => {
 test("ships the exact 74-card pool and cost distribution", async () => {
   const cards = JSON.parse((await readFile(new URL("../app/game/cards.json", import.meta.url), "utf8")).replace(/^\uFEFF/, ""));
   assert.equal(cards.length, 74);
-  assert.equal(cards.reduce((sum, card) => sum + card.cost, 0), 230);
+  assert.equal(cards.reduce((sum, card) => sum + card.cost, 0), 233);
   const byCategory = Object.fromEntries([...Map.groupBy(cards, card => card.category)].map(([key, rows]) => [key, rows.length]));
   assert.deepEqual(byCategory, { TRANSFORM:20, PROMOTION:3, OPENING:7, ACTIVE:7, PALACE:15, ANOMALY:10, RESTRICT:12 });
   const byCost = Object.fromEntries([...Map.groupBy(cards, card => card.cost)].map(([key, rows]) => [key, rows.length]));
-  assert.deepEqual(byCost, { 1:1, 1.5:5, 2:8, 2.5:11, 3:14, 3.5:16, 4:14, 4.5:2, 5:3 });
+  assert.deepEqual(byCost, { 1:1, 1.5:4, 2:7, 2.5:11, 3:15, 3.5:17, 4:14, 4.5:2, 5:3 });
   assert.equal(new Set(cards.map(card => card.id)).size, 74);
 });
 

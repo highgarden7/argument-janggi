@@ -545,6 +545,16 @@ export function swapCandidates(state:GameState,side:Side,card:Card,slot:"first"|
     (slot==="first"||!swap.distinctTypes||!chosen||piece.type!==chosen.type));
 }
 
+/**
+ * 기물 하나에 걸려 있는 제약 증강. 판 위 배지와 설명 팝업이 같은 목록을 쓴다.
+ * `remaining`은 남은 수가 정해진 제약에만 있고, 영구 제약은 비어 있다.
+ */
+export function pieceRestrictions(state:GameState,pieceId:string):{cardId:string;remaining?:number}[] {
+  return state.restrictions
+    .filter(row=>row.targetPieceId===pieceId&&row.remaining>0)
+    .map(row=>({cardId:row.cardId,remaining:restrictionTurnsRemaining(state,row.cardId)}));
+}
+
 /** 부활 대상은 잡혀서 판을 떠난 내 기물이다. 궁은 되살릴 수 없다. */
 export function revivablePieces(state:GameState,side:Side):Piece[] {
   return state.pieces.filter(piece=>piece.captured&&piece.side===side&&piece.type!=="gung");

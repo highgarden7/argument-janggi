@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { pieceArtPath } from "../app/art-assets";
-import { DRAFT_SET_EXCLUSIVE_GROUPS, DRAFT_CLOCK_MS, INITIAL_CLOCK_MS, MOVE_INCREMENT_MS, Piece, canUseUibyeongRest, cardActivationKind, createGame, generatePieceMoves, hunsukkunDropTargets, isFrozenByMudang, jangdolbaengiDropTargets, drawCards, legalMoves, migrateGameState, movePiece, myosupuriPlanningMoves, palaceLineTargets, projectGameView, reduceGame, restrictionTurnsRemaining, totalCost, trapTargets } from "../app/game/engine";
+import { DRAFT_SET_EXCLUSIVE_GROUPS, DRAFT_CLOCK_MS, INITIAL_CLOCK_MS, MOVE_INCREMENT_MS, Piece, canUseUibyeongRest, cardActivationKind, createGame, generatePieceMoves, hunsukkunDropTargets, isFrozenByMudang, jangdolbaengiDropTargets, drawCards, legalMoves, migrateGameState, movePiece, myosupuriPlanningMoves, palaceLineTargets, pieceRestrictions, projectGameView, reduceGame, restrictionTurnsRemaining, totalCost, trapTargets } from "../app/game/engine";
 import type { GameState } from "../app/game/model";
 import { DRAW_REQUIREMENT_RULES } from "../app/game/draw-requirements";
 import cards from "../app/game/cards.json";
@@ -1764,4 +1764,26 @@ test("내시는 한 번만 궁을 대신하고 그 뒤에는 궁이 잡힌다", 
   assert.equal(second.accepted,true,"차가 다시 궁을 친다");
   assert.equal(second.state.pieces.find(piece=>piece.id===king.id)?.captured,true,"이번에는 궁이 잡힌다");
   assert.equal(second.state.winner,"han","대국이 끝난다");
+});
+
+test("제약 배지는 실제로 걸린 기물에만 붙는다", () => {
+  const state=withAugment("injil");
+  const [chosen,other]=state.pieces.filter(piece=>piece.side==="han"&&piece.type==="ma");
+  const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:chosen.id},"cho");
+  assert.equal(used.accepted,true,"인질을 건다");
+
+  const badges=pieceRestrictions(used.state,chosen.id);
+  assert.deepEqual(badges.map(row=>row.cardId),["injil"],"고른 기물에만 배지가 붙는다");
+  assert.equal(badges[0].remaining,4,"남은 수를 함께 보여 준다");
+  assert.deepEqual(pieceRestrictions(used.state,other.id),[],"같은 종류의 다른 기물에는 붙지 않는다");
+  const mine=used.state.pieces.find(piece=>piece.side==="cho"&&piece.type==="ma")!;
+  assert.deepEqual(pieceRestrictions(used.state,mine.id),[],"내 기물에는 붙지 않는다");
+
+  // 영구 제약은 배지만 뜨고 남은 수는 표시하지 않는다.
+  const rust=withAugment("sucha");
+  const enemyCha=rust.pieces.find(piece=>piece.side==="han"&&piece.type==="cha")!;
+  const rusted=reduceGame(rust,{type:"USE_AUGMENT",cardIndex:rust.cards.cho.length-1,targetPieceId:enemyCha.id},"cho");
+  const rustBadges=pieceRestrictions(rusted.state,enemyCha.id);
+  assert.deepEqual(rustBadges.map(row=>row.cardId),["sucha"],"영구 제약도 배지로 보인다");
+  assert.equal(rustBadges[0].remaining,undefined,"영구 제약에는 남은 수가 없다");
 });
