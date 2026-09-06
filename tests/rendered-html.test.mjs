@@ -82,15 +82,26 @@ test("movement generator intentionally omits self-check filtering", async () => 
   assert.match(engine, /export function reduceGame/);
 });
 
-test("costs render as full and clipped half-star emoji instead of decimals", async () => {
+test("costs render as SVG stars with an exact half instead of decimals", async () => {
   const app = await readFile(new URL("../app/GameApp.tsx", import.meta.url), "utf8");
   const styles = await readFile(new URL("../app/art.css", import.meta.url), "utf8");
   assert.match(app, /function StarCost/);
-  assert.match(app, />⭐<\/span>/);
-  assert.match(app, /className="half-star"/);
+  // 이모지는 글리프마다 여백이 달라 절반으로 자를 수 없다. SVG 별로 그린다.
+  assert.doesNotMatch(app, /⭐|☆/);
+  assert.match(app, /const STAR_PATH\s*=/);
+  assert.match(app, /className="star-half-fill"/);
   assert.doesNotMatch(app, /cost\.toFixed\(1\)/);
   assert.doesNotMatch(app, /totalCost\([^)]*\)\.toFixed\(1\)/);
-  assert.match(styles, /\.half-star\s*\{/);
+  // 반 개는 컨테이너를 정확히 50%만 남겨 그린다.
+  assert.match(styles, /\.star-cost \.star-half-fill\s*\{[^}]*width:\s*50%/);
+  assert.match(styles, /\.star-cost\s*\{[^}]*color:\s*var\(--ink\)/);
+});
+
+test("the top bar no longer repeats the star totals", async () => {
+  const app = await readFile(new URL("../app/GameApp.tsx", import.meta.url), "utf8");
+  const readout = app.match(/<div className="turn-readout">.*?<\/div>/s);
+  assert.ok(readout, "차례 표시가 있어야 한다");
+  assert.doesNotMatch(readout[0], /StarCost/, "상단 차례 표시에는 별 합계를 두지 않는다");
 });
 
 test("used augments render the supplied stamp above a muted card", async () => {

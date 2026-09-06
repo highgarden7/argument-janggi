@@ -575,23 +575,51 @@
 .star-cost {
   display: inline-flex;
   align-items: center;
-  gap: .02em;
+  gap: .08em;
   white-space: nowrap;
-  font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
-  font-size: .82em;
-  letter-spacing: -.12em;
+  color: var(--ink);
+  line-height: 1;
+  vertical-align: -.08em;
 }
 
-.half-star {
+.star-cost .star {
+  position: relative;
   display: inline-block;
-  width: .5em;
+  flex: none;
+  width: .95em;
+  height: .95em;
+}
+
+.star-cost svg {
+  display: block;
+  width: .95em;
+  height: .95em;
+}
+
+.star-cost .full .star-base path {
+  fill: currentColor;
+}
+
+/* 빈 별과 반 개의 남은 절반은 같은 윤곽으로 그린다. */
+.star-cost .empty .star-base path,
+.star-cost .half .star-base path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linejoin: round;
+  opacity: .38;
+}
+
+/* 컨테이너를 정확히 절반만 남기고, 안쪽 별은 원래 크기를 유지한다. */
+.star-cost .star-half-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 50%;
   overflow: hidden;
 }
 
-.half-star i {
-  display: block;
-  width: 1em;
-  font-style: normal;
+.star-cost .star-half-fill path {
+  fill: currentColor;
 }
 
 .card-art image {
@@ -943,7 +971,6 @@
 }
 
 .augment-detail-heading .star-cost {
-  color: var(--gold);
   font-size: 14px;
 }
 
