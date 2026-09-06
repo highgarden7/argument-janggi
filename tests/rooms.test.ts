@@ -268,7 +268,8 @@ test("each player picks their own formation and it reaches the started board", a
   const game = started.room.game as GameState;
   const backRank = (side: Side, y: number) => [1, 2, 6, 7].map(x => game.pieces.find(piece => piece.side === side && piece.x === x && piece.y === y)!.type);
   assert.deepEqual(backRank("cho", 0), FORMATION_BACK_RANK["귀마"]);
-  assert.deepEqual(backRank("han", 9), FORMATION_BACK_RANK["양귀마"]);
+  // 한은 판을 반대편에서 보므로 논리 좌표로는 좌우가 뒤집혀 놓인다. 좌우 대칭 자체는 엔진 테스트가 지킨다.
+  assert.deepEqual(backRank("han", 9), [...FORMATION_BACK_RANK["양귀마"]].reverse());
 });
 
 test("quick match pairs two players and needs both to accept before the lobby opens", async () => {

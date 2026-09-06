@@ -13,9 +13,10 @@ export function projectGameView(state: GameState, viewer: Side): GameState {
     eventSequence: state.eventSequence,
     rngSeed: state.rngSeed,
     phase: state.phase,
+    // 암행어사 같은 은밀한 지정은 소유자에게만 실어 보낸다. 상대에게는 평범한 기물로 보인다.
     pieces: state.pieces
       .filter((piece) => !piece.hidden || piece.side === viewer)
-      .map((piece) => ({ ...piece })),
+      .map((piece) => piece.side === viewer ? { ...piece } : { ...piece, secretCardId: undefined }),
     turn: state.turn,
     clocks: { ...state.clocks },
     draftClockMs: state.draftClockMs,

@@ -51,6 +51,8 @@ export type Piece = Square & {
   type: PieceType;
   captured?: boolean;
   transformCardId?: string;
+  /** 소유자에게만 보이는 지정(암행어사). 상대 시야로 투영할 때 지워진다. */
+  secretCardId?: string;
   captureLockedPly?: number;
   hp?: number;
   growth?: number;

@@ -1787,3 +1787,69 @@ test("제약 배지는 실제로 걸린 기물에만 붙는다", () => {
   assert.deepEqual(rustBadges.map(row=>row.cardId),["sucha"],"영구 제약도 배지로 보인다");
   assert.equal(rustBadges[0].remaining,undefined,"영구 제약에는 남은 수가 없다");
 });
+
+test("포진은 양쪽 모두 자기 진영에서 본 왼쪽부터 놓인다", () => {
+  // 원앙마(마·상·마·상)는 좌우가 다른 포진이라 뒤집힘을 잡아낸다.
+  const game=createGame({cho:"원앙마",han:"원앙마"},false);
+  const fileOrder=(side:"cho"|"han",files:number[],y:number)=>files.map(x=>game.pieces.find(piece=>piece.side===side&&piece.x===x&&piece.y===y)!.type);
+
+  assert.deepEqual(fileOrder("cho",[1,2,6,7],0),["ma","sang","ma","sang"],"초는 왼쪽부터 마상마상이다");
+  // 한은 판을 반대편에서 보므로 논리 좌표로는 좌우가 뒤집혀 놓인다.
+  assert.deepEqual(fileOrder("han",[1,2,6,7],9),["sang","ma","sang","ma"],"초 기준 오른쪽부터 마상마상이다");
+  // 한 플레이어 화면은 x가 큰 쪽이 왼쪽이다. 그 순서로 읽으면 고른 포진 그대로여야 한다.
+  assert.deepEqual(fileOrder("han",[7,6,2,1],9),["ma","sang","ma","sang"],"한 화면에서도 왼쪽부터 마상마상이다");
+
+  // 면상(상·마·상·마)은 원앙마를 뒤집은 모양이라, 두 포진이 서로 뒤바뀌지 않는지도 확인한다.
+  const mixed=createGame({cho:"면상",han:"면상"},false);
+  const mixedOrder=(side:"cho"|"han",files:number[],y:number)=>files.map(x=>mixed.pieces.find(piece=>piece.side===side&&piece.x===x&&piece.y===y)!.type);
+  assert.deepEqual(mixedOrder("cho",[1,2,6,7],0),["sang","ma","sang","ma"],"초 면상은 상마상마다");
+  assert.deepEqual(mixedOrder("han",[7,6,2,1],9),["sang","ma","sang","ma"],"한 면상도 자기 화면에서 상마상마다");
+});
+
+test("서로 다른 포진을 골라도 각자 고른 대로 놓인다", () => {
+  const game=createGame({cho:"원앙마",han:"면상"},false);
+  const seen=(side:"cho"|"han")=>(side==="cho"?[1,2,6,7]:[7,6,2,1]).map(x=>game.pieces.find(piece=>piece.side===side&&piece.x===x&&piece.y===(side==="cho"?0:9))!.type);
+  assert.deepEqual(seen("cho"),["ma","sang","ma","sang"],"초는 원앙마 그대로다");
+  assert.deepEqual(seen("han"),["sang","ma","sang","ma"],"한은 면상 그대로다");
+});
+
+test("암행어사는 지정한 졸에만 표식을 남기고 상대 시야에서는 감춰진다", () => {
+  const state=withAugment("amhaeng-eosa");
+  const index=state.cards.cho.length-1;
+  const [chosen,other]=state.pieces.filter(piece=>piece.side==="cho"&&piece.type==="jol");
+  const used=reduceGame(state,{type:"USE_AUGMENT",cardIndex:index,targetPieceId:chosen.id},"cho");
+  assert.equal(used.accepted,true,"내 졸에 지정한다");
+
+  const marked=used.state.pieces.find(piece=>piece.id===chosen.id)!;
+  assert.equal(marked.secretCardId,"amhaeng-eosa","고른 졸에 표식이 붙는다");
+  assert.equal(used.state.pieces.find(piece=>piece.id===other.id)?.secretCardId,undefined,"다른 졸에는 붙지 않는다");
+  assert.equal(marked.transformCardId,undefined,"변신이 아니므로 행마는 그대로다");
+  assert.deepEqual(legalMoves(used.state,chosen.id),legalMoves(state,chosen.id),"이동 가능 칸이 달라지지 않는다");
+
+  // 카드를 쓴 티가 나면 은닉이 깨진다. 사용됨 도장이 찍히지 않아야 한다.
+  assert.notEqual(used.state.cards.cho[index].state,"used","사용됨으로 표시되지 않는다");
+
+  // 소유자 화면에는 표식이 실리고, 상대 화면에는 평범한 졸로 간다.
+  const ownerView=projectGameView(used.state,"cho");
+  const enemyView=projectGameView(used.state,"han");
+  assert.equal(ownerView.pieces.find(piece=>piece.id===chosen.id)?.secretCardId,"amhaeng-eosa","내 화면에는 보인다");
+  assert.equal(enemyView.pieces.find(piece=>piece.id===chosen.id)?.secretCardId,undefined,"상대 화면에는 감춰진다");
+  assert.equal(pieceArtPath(ownerView.pieces.find(piece=>piece.id===chosen.id)!),"/pieces/cho-t-amhaeng-eosa.svg","내게는 암행어사 말로 보인다");
+  assert.equal(pieceArtPath(enemyView.pieces.find(piece=>piece.id===chosen.id)!),"/pieces/cho-jol.svg","상대에게는 평범한 졸로 보인다");
+});
+
+test("암행어사 졸이 상대 끝줄에 닿으면 즉시 승리한다", () => {
+  const state=withAugment("amhaeng-eosa");
+  const scout=state.pieces.find(piece=>piece.side==="cho"&&piece.type==="jol")!;
+  const marked=reduceGame(state,{type:"USE_AUGMENT",cardIndex:state.cards.cho.length-1,targetPieceId:scout.id},"cho").state;
+
+  // 지정한 졸을 상대 끝줄 바로 앞에 세우고 한 칸 전진시킨다.
+  const board:GameState={...marked,turn:"cho",pieces:marked.pieces.map(piece=>{
+    if(piece.id===scout.id)return{...piece,x:0,y:8};
+    return piece.side==="han"&&piece.x===0&&piece.y===9?{...piece,captured:true}:{...piece};
+  })};
+  const won=reduceGame(board,{type:"MOVE_PIECE",pieceId:scout.id,to:{x:0,y:9}},"cho");
+  assert.equal(won.accepted,true,"끝줄로 전진한다");
+  assert.equal(won.state.winner,"cho","암행어사가 도달하면 승리한다");
+  assert.equal(won.state.endReason,"special_victory","특수 승리로 기록된다");
+});

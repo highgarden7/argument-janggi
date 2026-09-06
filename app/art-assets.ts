@@ -35,12 +35,18 @@ export function cardArtPath(cardId: string): string {
   return `/cards/${cardId}.svg`;
 }
 
-export function pieceArtPath(piece: Pick<Piece, "side" | "type" | "transformCardId">): string {
+/** 소유자에게만 드러나는 지정의 전용 아트. 상대 시야에서는 이 값이 지워져 평범한 기물로 보인다. */
+const SECRET_ART_IDS = new Set(["amhaeng-eosa"]);
+
+export function pieceArtPath(piece: Pick<Piece, "side" | "type" | "transformCardId" | "secretCardId">): string {
   if (piece.transformCardId && TRANSFORM_ART_ALIASES[piece.transformCardId]) {
     return `/pieces/${piece.side}-t-${TRANSFORM_ART_ALIASES[piece.transformCardId]}.svg`;
   }
   if (piece.transformCardId && TRANSFORM_ART_IDS.has(piece.transformCardId)) {
     return `/pieces/${piece.side}-t-${piece.transformCardId}.svg`;
+  }
+  if (piece.secretCardId && SECRET_ART_IDS.has(piece.secretCardId)) {
+    return `/pieces/${piece.side}-t-${piece.secretCardId}.svg`;
   }
   return `/pieces/${piece.side}-${piece.type}.svg`;
 }
