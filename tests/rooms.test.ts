@@ -91,6 +91,14 @@ class MemoryStatement {
       [row.matched_at, row.updated_at, row.expires_at] = this.values;
       row.status = "waiting";
     });
+    // 재대결 합의: 빠른 대국 방을 친선전과 같은 자유 설정 대기실로 되돌린다.
+    if (this.sql.startsWith("UPDATE rooms SET status = 'waiting', is_public = 0")) return update(this.db, this.values, 2, 3, row => {
+      [row.updated_at, row.expires_at] = this.values;
+      Object.assign(row, {
+        status: "waiting", is_public: 0, host_side: null, host_ready: 0, guest_ready: 0,
+        host_accepted: 0, guest_accepted: 0, game_json: null, action_started_at: null, matched_at: null,
+      });
+    });
 
     if (this.sql.startsWith("UPDATE rooms SET guest_token_hash")) return update(this.db, this.values, 4, 5, row => {
       if (row.guest_token_hash !== null) return;
@@ -116,6 +124,8 @@ class MemoryStatement {
       [row.host_side, row.game_json, row.action_started_at, row.updated_at, row.expires_at] = this.values;
       row.status = "playing";
       row.match_number = Number(row.match_number) + 1;
+      row.host_accepted = 0;
+      row.guest_accepted = 0;
     });
     if (this.sql.startsWith("UPDATE rooms SET game_json")) return update(this.db, this.values, 5, 6, row => {
       [row.game_json, row.status, row.action_started_at, row.updated_at, row.expires_at] = this.values;
@@ -318,4 +328,40 @@ test("declining a found match removes the room for both players", async () => {
   // 남은 쪽의 폴링은 404를 받아 로비로 돌아간다.
   const gone = await api(db, `/api/rooms/${host.room.code}`, "GET", host.token);
   assert.equal(gone.status, 404);
+});
+
+test("quick match rematch needs both sides and reopens a freely configurable lobby", async () => {
+  const db = new MemoryD1();
+  const host = await (await api(db, "/api/rooms/quick", "POST", undefined, { nickname: "방장" })).json() as { token: string; room: RoomView };
+  const guest = await (await api(db, "/api/rooms/quick", "POST", undefined, { nickname: "참가자" })).json() as { token: string; room: RoomView };
+  const code = host.room.code;
+  await api(db, `/api/rooms/${code}/accept`, "POST", host.token);
+  await api(db, `/api/rooms/${code}/accept`, "POST", guest.token);
+  await api(db, `/api/rooms/${code}/ready`, "POST", host.token, { ready: true });
+  const started = await (await api(db, `/api/rooms/${code}/ready`, "POST", guest.token, { ready: true })).json() as { room: RoomView };
+  assert.equal(started.room.status, "playing");
+
+  // 대국이 끝나기 전에는 재대결을 요청할 수 없다.
+  assert.equal((await api(db, `/api/rooms/${code}/rematch`, "POST", host.token)).status, 409);
+
+  const resigned = await (await api(db, `/api/rooms/${code}/command`, "POST", host.token, {
+    expectedRevision: started.room.revision, command: { type: "RESIGN" },
+  })).json() as { room: RoomView };
+  assert.equal(resigned.room.status, "finished");
+
+  // 한쪽만 요청하면 아직 열리지 않는다.
+  const half = await (await api(db, `/api/rooms/${code}/rematch`, "POST", host.token)).json() as { room: RoomView };
+  assert.equal(half.room.status, "finished", "상대가 응답할 때까지 기다린다");
+  assert.deepEqual(half.room.accepted, { mine: true, theirs: false });
+
+  const reopened = await (await api(db, `/api/rooms/${code}/rematch`, "POST", guest.token)).json() as { room: RoomView };
+  assert.equal(reopened.room.status, "waiting", "양쪽이 원하면 대기실이 열린다");
+  assert.equal(reopened.room.isPublic, false, "친선전과 같은 자유 설정 방이 된다");
+
+  // 이제 진영과 증강을 다시 고를 수 있다.
+  const settings = await (await api(db, `/api/rooms/${code}/settings`, "PATCH", host.token, { sideChoice: "cho", augments: false })).json() as { room: RoomView };
+  assert.equal(settings.room.sideChoice, "cho");
+  assert.equal(settings.room.augments, false);
+  const formation = await (await api(db, `/api/rooms/${code}/formation`, "PATCH", guest.token, { formation: "면상" })).json() as { room: RoomView };
+  assert.equal(formation.room.guest?.formation, "면상");
 });

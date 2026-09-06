@@ -265,7 +265,8 @@ async function setReady(request: Request, env: RoomEnv, row: RoomRow, role: Room
       ? { cho: updated.host_formation, han: updated.guest_formation }
       : { cho: updated.guest_formation, han: updated.host_formation };
     const game = createGame(formations, !!updated.augments, randomSeed());
-    const started = await env.DB.prepare("UPDATE rooms SET host_side = ?, status = 'playing', game_json = ?, match_number = match_number + 1, action_started_at = ?, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ? AND host_ready = 1 AND guest_ready = 1")
+    // 수락 표시는 대국이 시작될 때 비워 두고, 끝난 뒤 재대결 합의에 다시 쓴다.
+    const started = await env.DB.prepare("UPDATE rooms SET host_side = ?, status = 'playing', game_json = ?, match_number = match_number + 1, action_started_at = ?, host_accepted = 0, guest_accepted = 0, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ? AND host_ready = 1 AND guest_ready = 1")
       .bind(hostSide, JSON.stringify(game), now, now, now + ROOM_TTL_MS, updated.code, updated.revision).run();
     if ((started.meta.changes ?? 0) === 1) updated = (await readRoom(env.DB, row.code)) ?? updated;
   }
@@ -385,6 +386,30 @@ async function cancelMatch(env: RoomEnv, row: RoomRow, role: RoomRole): Promise<
   return json({ cancelled: true });
 }
 
+/**
+ * 빠른 대국의 재대결. 양쪽이 요청하면 친선전과 같은 자유 설정 대기실로 바뀐다.
+ * 이때 `is_public`을 내려 진영·증강을 다시 고를 수 있게 하고 노쇼 시계도 뗀다.
+ */
+async function requestRematch(env: RoomEnv, row: RoomRow, role: RoomRole): Promise<Response> {
+  if (!row.is_public) return error("빠른 대국 방이 아닙니다.", 409);
+  if (row.status !== "finished" && !parseGame(row)?.winner) return error("대국이 끝난 뒤 재대결을 요청할 수 있습니다.", 409);
+  const now = Date.now();
+  const column = role === "host" ? "host_accepted" : "guest_accepted";
+  const result = await env.DB.prepare(
+    `UPDATE rooms SET ${column} = 1, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ?`,
+  ).bind(now, now + ROOM_TTL_MS, row.code, row.revision).run();
+  if ((result.meta.changes ?? 0) !== 1) return error("방 상태가 갱신되었습니다. 다시 시도하세요.", 409);
+  let updated = await readRoom(env.DB, row.code);
+  if (!updated) return error("방을 불러오지 못했습니다.", 500);
+  if (updated.host_accepted && updated.guest_accepted) {
+    const opened = await env.DB.prepare(
+      "UPDATE rooms SET status = 'waiting', is_public = 0, host_side = NULL, host_ready = 0, guest_ready = 0, host_accepted = 0, guest_accepted = 0, game_json = NULL, action_started_at = NULL, matched_at = NULL, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ?",
+    ).bind(now, now + ROOM_TTL_MS, updated.code, updated.revision).run();
+    if ((opened.meta.changes ?? 0) === 1) updated = (await readRoom(env.DB, row.code)) ?? updated;
+  }
+  return json({ room: roomView(updated, role) });
+}
+
 /** 수락을 안 하거나 대기실에서 준비하지 않고 사라진 방을 걷어낸다. */
 async function sweepStaleRooms(db: D1Database, now: number): Promise<void> {
   await db.batch([
@@ -399,7 +424,7 @@ export async function handleRoomRequest(request: Request, env: RoomEnv): Promise
   const url = new URL(request.url);
   if (url.pathname === "/api/rooms" && request.method === "POST") return createRoom(request, env);
   if (url.pathname === "/api/rooms/quick" && request.method === "POST") return quickMatch(request, env);
-  const match = url.pathname.match(/^\/api\/rooms\/([A-Z2-9]{6})(?:\/(join|settings|formation|ready|command|lobby|accept|cancel))?$/i);
+  const match = url.pathname.match(/^\/api\/rooms\/([A-Z2-9]{6})(?:\/(join|settings|formation|ready|command|lobby|accept|cancel|rematch))?$/i);
   if (!match) return url.pathname.startsWith("/api/rooms") ? error("요청한 방 기능을 찾을 수 없습니다.", 404) : null;
   const code = match[1].toUpperCase();
   const action = match[2];
@@ -416,5 +441,6 @@ export async function handleRoomRequest(request: Request, env: RoomEnv): Promise
   if (action === "lobby" && request.method === "POST") return returnToLobby(env, row, role);
   if (action === "accept" && request.method === "POST") return acceptMatch(env, row, role);
   if (action === "cancel" && request.method === "POST") return cancelMatch(env, row, role);
+  if (action === "rematch" && request.method === "POST") return requestRematch(env, row, role);
   return error("지원하지 않는 요청입니다.", 405);
 }

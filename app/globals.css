@@ -51,6 +51,25 @@ button{touch-action:manipulation}
   .lobby-note{font-size:11px;line-height:1.5}
 }
 
+/* 증강 선택 화면에서 어느 진영이 고르는 중인지, 그게 나인지 바로 알 수 있게 한다. */
+.draft-side-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:10px;padding:6px 14px 6px 6px;border:1px solid currentColor;border-radius:999px}
+.draft-side-mark.cho{color:var(--green)}
+.draft-side-mark.han{color:var(--red)}
+.draft-side-mark .seal{width:32px;height:32px;display:grid;place-items:center;border:1px solid currentColor;border-radius:50%;font:18px Georgia,"Batang",serif}
+.draft-side-mark strong{display:block;font:700 14px Georgia,"Batang",serif}
+.draft-side-mark small{display:block;margin-top:1px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.08em}
+.draft-side-mark.is-mine{color:#fff;border-color:transparent}
+.draft-side-mark.is-mine.cho{background:var(--green)}
+.draft-side-mark.is-mine.han{background:var(--red)}
+.draft-side-mark.is-mine small{color:rgba(255,255,255,.82)}
+.draft-modal.side-cho{border-top:4px solid var(--green)}
+.draft-modal.side-han{border-top:4px solid var(--red)}
+
+/* 판 위 이름표 옆의 "나" 표시. 온라인에서 내 진영을 상시 알려 준다. */
+.you-badge{margin-left:6px;padding:1px 6px;border-radius:999px;background:var(--ink);color:#fff;font:700 9px/1.6 ui-monospace,monospace;font-style:normal;letter-spacing:.06em}
+
+.rematch-note{margin:10px 0 0;color:var(--muted);font-size:11px;line-height:1.6;text-align:center}
+
 .friendly-choices{display:grid;gap:10px;margin-top:18px}
 .friendly-choices button{padding:16px;border:1px solid #cfc8bb;background:#f7f3ea;color:var(--ink);text-align:left;cursor:pointer}
 .friendly-choices button:hover{border-color:var(--ink)}
