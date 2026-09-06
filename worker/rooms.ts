@@ -353,19 +353,19 @@ async function acceptMatch(env: RoomEnv, row: RoomRow, role: RoomRole): Promise<
   if (!row.guest_token_hash) return error("아직 상대를 찾는 중입니다.", 409);
   const now = Date.now();
   if (row.matched_at && now > row.matched_at + MATCH_ACCEPT_MS) return error("수락 시간이 지났습니다.", 409);
+  // 각자 자기 표시만 세우므로 revision을 걸지 않는다. 양쪽이 같은 순간에 눌러도 둘 다 기록된다.
   const column = role === "host" ? "host_accepted" : "guest_accepted";
-  const result = await env.DB.prepare(
-    `UPDATE rooms SET ${column} = 1, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ?`,
-  ).bind(now, now + ROOM_TTL_MS, row.code, row.revision).run();
-  if ((result.meta.changes ?? 0) !== 1) return error("방 상태가 갱신되었습니다. 다시 시도하세요.", 409);
+  await env.DB.prepare(
+    `UPDATE rooms SET ${column} = 1, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND status = 'matching' AND ${column} = 0`,
+  ).bind(now, now + ROOM_TTL_MS, row.code).run();
   let updated = await readRoom(env.DB, row.code);
   if (!updated) return error("방을 불러오지 못했습니다.", 500);
-  if (updated.host_accepted && updated.guest_accepted) {
+  if (updated.status === "matching" && updated.host_accepted && updated.guest_accepted) {
     // 대기실 시계는 이때부터 다시 센다. 노쇼 정리는 matched_at 기준이다.
-    const opened = await env.DB.prepare(
-      "UPDATE rooms SET status = 'waiting', matched_at = ?, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ? AND status = 'matching'",
-    ).bind(now, now, now + ROOM_TTL_MS, updated.code, updated.revision).run();
-    if ((opened.meta.changes ?? 0) === 1) updated = (await readRoom(env.DB, row.code)) ?? updated;
+    await env.DB.prepare(
+      "UPDATE rooms SET status = 'waiting', matched_at = ?, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND status = 'matching'",
+    ).bind(now, now, now + ROOM_TTL_MS, updated.code).run();
+    updated = (await readRoom(env.DB, row.code)) ?? updated;
   }
   return json({ room: roomView(updated, role) });
 }
@@ -394,18 +394,18 @@ async function requestRematch(env: RoomEnv, row: RoomRow, role: RoomRole): Promi
   if (!row.is_public) return error("빠른 대국 방이 아닙니다.", 409);
   if (row.status !== "finished" && !parseGame(row)?.winner) return error("대국이 끝난 뒤 재대결을 요청할 수 있습니다.", 409);
   const now = Date.now();
+  // 수락과 마찬가지로 자기 표시만 세운다. 동시에 눌러도 한쪽이 밀려나지 않는다.
   const column = role === "host" ? "host_accepted" : "guest_accepted";
-  const result = await env.DB.prepare(
-    `UPDATE rooms SET ${column} = 1, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ?`,
-  ).bind(now, now + ROOM_TTL_MS, row.code, row.revision).run();
-  if ((result.meta.changes ?? 0) !== 1) return error("방 상태가 갱신되었습니다. 다시 시도하세요.", 409);
+  await env.DB.prepare(
+    `UPDATE rooms SET ${column} = 1, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND status = ? AND ${column} = 0`,
+  ).bind(now, now + ROOM_TTL_MS, row.code, row.status).run();
   let updated = await readRoom(env.DB, row.code);
   if (!updated) return error("방을 불러오지 못했습니다.", 500);
-  if (updated.host_accepted && updated.guest_accepted) {
-    const opened = await env.DB.prepare(
-      "UPDATE rooms SET status = 'waiting', is_public = 0, host_side = NULL, host_ready = 0, guest_ready = 0, host_accepted = 0, guest_accepted = 0, game_json = NULL, action_started_at = NULL, matched_at = NULL, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND revision = ?",
-    ).bind(now, now + ROOM_TTL_MS, updated.code, updated.revision).run();
-    if ((opened.meta.changes ?? 0) === 1) updated = (await readRoom(env.DB, row.code)) ?? updated;
+  if (updated.status === row.status && updated.host_accepted && updated.guest_accepted) {
+    await env.DB.prepare(
+      "UPDATE rooms SET status = 'waiting', is_public = 0, host_side = NULL, host_ready = 0, guest_ready = 0, host_accepted = 0, guest_accepted = 0, game_json = NULL, action_started_at = NULL, matched_at = NULL, updated_at = ?, expires_at = ?, revision = revision + 1 WHERE code = ? AND status = ?",
+    ).bind(now, now + ROOM_TTL_MS, updated.code, row.status).run();
+    updated = (await readRoom(env.DB, row.code)) ?? updated;
   }
   return json({ room: roomView(updated, role) });
 }

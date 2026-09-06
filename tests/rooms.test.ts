@@ -82,23 +82,37 @@ class MemoryStatement {
       if (row.guest_token_hash !== null || row.status !== "matching") return;
       [row.guest_token_hash, row.guest_name, row.matched_at, row.updated_at, row.expires_at] = this.values;
     });
-    if (this.sql.startsWith("UPDATE rooms SET host_accepted") || this.sql.startsWith("UPDATE rooms SET guest_accepted")) return update(this.db, this.values, 2, 3, row => {
-      row[this.sql.includes("host_accepted") ? "host_accepted" : "guest_accepted"] = 1;
+    // 수락·재대결은 revision을 걸지 않는 멱등 UPDATE다. 자기 표시가 0일 때만 세운다.
+    if (this.sql.startsWith("UPDATE rooms SET host_accepted") || this.sql.startsWith("UPDATE rooms SET guest_accepted")) {
+      const column = this.sql.includes("host_accepted") ? "host_accepted" : "guest_accepted";
+      const row = this.db.rooms.get(String(this.values[2]));
+      const expectedStatus = this.sql.includes("status = 'matching'") ? "matching" : this.values[3];
+      if (!row || row[column] !== 0 || row.status !== expectedStatus) return { meta: { changes: 0 } };
+      row[column] = 1;
       [row.updated_at, row.expires_at] = this.values;
-    });
-    if (this.sql.startsWith("UPDATE rooms SET status = 'waiting', matched_at")) return update(this.db, this.values, 3, 4, row => {
-      if (row.status !== "matching") return;
+      row.revision += 1;
+      return { meta: { changes: 1 } };
+    }
+    if (this.sql.startsWith("UPDATE rooms SET status = 'waiting', matched_at")) {
+      const row = this.db.rooms.get(String(this.values[3]));
+      if (!row || row.status !== "matching") return { meta: { changes: 0 } };
       [row.matched_at, row.updated_at, row.expires_at] = this.values;
       row.status = "waiting";
-    });
+      row.revision += 1;
+      return { meta: { changes: 1 } };
+    }
     // 재대결 합의: 빠른 대국 방을 친선전과 같은 자유 설정 대기실로 되돌린다.
-    if (this.sql.startsWith("UPDATE rooms SET status = 'waiting', is_public = 0")) return update(this.db, this.values, 2, 3, row => {
+    if (this.sql.startsWith("UPDATE rooms SET status = 'waiting', is_public = 0")) {
+      const row = this.db.rooms.get(String(this.values[2]));
+      if (!row || row.status !== this.values[3]) return { meta: { changes: 0 } };
       [row.updated_at, row.expires_at] = this.values;
       Object.assign(row, {
         status: "waiting", is_public: 0, host_side: null, host_ready: 0, guest_ready: 0,
         host_accepted: 0, guest_accepted: 0, game_json: null, action_started_at: null, matched_at: null,
       });
-    });
+      row.revision += 1;
+      return { meta: { changes: 1 } };
+    }
 
     if (this.sql.startsWith("UPDATE rooms SET guest_token_hash")) return update(this.db, this.values, 4, 5, row => {
       if (row.guest_token_hash !== null) return;
@@ -364,4 +378,38 @@ test("quick match rematch needs both sides and reopens a freely configurable lob
   assert.equal(settings.room.augments, false);
   const formation = await (await api(db, `/api/rooms/${code}/formation`, "PATCH", guest.token, { formation: "면상" })).json() as { room: RoomView };
   assert.equal(formation.room.guest?.formation, "면상");
+});
+
+test("accepting and rematching survive both players clicking at the same moment", async () => {
+  const db = new MemoryD1();
+  const host = await (await api(db, "/api/rooms/quick", "POST", undefined, { nickname: "방장" })).json() as { token: string; room: RoomView };
+  const guest = await (await api(db, "/api/rooms/quick", "POST", undefined, { nickname: "참가자" })).json() as { token: string; room: RoomView };
+  const code = host.room.code;
+
+  // 같은 revision을 들고 동시에 눌러도 두 수락이 모두 기록되어야 한다.
+  const [hostAccept, guestAccept] = await Promise.all([
+    api(db, `/api/rooms/${code}/accept`, "POST", host.token),
+    api(db, `/api/rooms/${code}/accept`, "POST", guest.token),
+  ]);
+  assert.equal(hostAccept.status, 200, "방장 수락이 밀려나지 않는다");
+  assert.equal(guestAccept.status, 200, "참가자 수락도 밀려나지 않는다");
+  const afterAccept = await (await api(db, `/api/rooms/${code}`, "GET", host.token)).json() as { room: RoomView };
+  assert.equal(afterAccept.room.status, "waiting", "동시에 눌러도 대기실이 열린다");
+
+  await api(db, `/api/rooms/${code}/ready`, "POST", host.token, { ready: true });
+  const started = await (await api(db, `/api/rooms/${code}/ready`, "POST", guest.token, { ready: true })).json() as { room: RoomView };
+  await api(db, `/api/rooms/${code}/command`, "POST", host.token, {
+    expectedRevision: started.room.revision, command: { type: "RESIGN" },
+  });
+
+  const [hostRematch, guestRematch] = await Promise.all([
+    api(db, `/api/rooms/${code}/rematch`, "POST", host.token),
+    api(db, `/api/rooms/${code}/rematch`, "POST", guest.token),
+  ]);
+  assert.equal(hostRematch.status, 200);
+  assert.equal(guestRematch.status, 200);
+  const afterRematch = await (await api(db, `/api/rooms/${code}`, "GET", guest.token)).json() as { room: RoomView };
+  assert.equal(afterRematch.room.status, "waiting", "동시에 눌러도 대기실로 넘어간다");
+  assert.equal(afterRematch.room.isPublic, false, "자유 설정 방이 된다");
+  assert.equal(afterRematch.room.game, undefined, "지난 대국은 비워진다");
 });

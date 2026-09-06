@@ -68,8 +68,6 @@ button{touch-action:manipulation}
 /* 판 위 이름표 옆의 "나" 표시. 온라인에서 내 진영을 상시 알려 준다. */
 .you-badge{margin-left:6px;padding:1px 6px;border-radius:999px;background:var(--ink);color:#fff;font:700 9px/1.6 ui-monospace,monospace;font-style:normal;letter-spacing:.06em}
 
-.rematch-note{margin:10px 0 0;color:var(--muted);font-size:11px;line-height:1.6;text-align:center}
-
 .friendly-choices{display:grid;gap:10px;margin-top:18px}
 .friendly-choices button{padding:16px;border:1px solid #cfc8bb;background:#f7f3ea;color:var(--ink);text-align:left;cursor:pointer}
 .friendly-choices button:hover{border-color:var(--ink)}
