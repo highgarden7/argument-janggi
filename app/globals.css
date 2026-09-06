@@ -51,6 +51,25 @@ button{touch-action:manipulation}
   .lobby-note{font-size:11px;line-height:1.5}
 }
 
+.friendly-choices{display:grid;gap:10px;margin-top:18px}
+.friendly-choices button{padding:16px;border:1px solid #cfc8bb;background:#f7f3ea;color:var(--ink);text-align:left;cursor:pointer}
+.friendly-choices button:hover{border-color:var(--ink)}
+.friendly-choices strong{display:block;font:700 16px Georgia,"Batang",serif}
+.friendly-choices small{display:block;margin-top:4px;color:var(--muted);font-size:11px}
+
+.matchmaking-card{text-align:left}
+.matchmaking-search{display:grid;justify-items:center;gap:8px;padding:34px 12px;text-align:center}
+.matchmaking-search strong{font:500 16px Georgia,"Batang",serif}
+.matchmaking-search small{color:var(--muted);font-size:12px}
+.matchmaking-spinner{width:34px;height:34px;border:2px solid #d8d1c5;border-top-color:var(--gold);border-radius:50%;animation:matchmaking-spin 900ms linear infinite}
+@keyframes matchmaking-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.matchmaking-spinner{animation-duration:3s}}
+.matchmaking-note{margin:16px 0;color:var(--muted);font-size:12px;text-align:center;line-height:1.6}
+.matchmaking-note b{color:var(--ink)}
+.room-fixed-note{padding:13px;border:1px solid #c9b88f;background:#f3ead4}
+.room-fixed-note b{display:block;font-size:12px}
+.room-fixed-note small{display:block;margin-top:4px;color:var(--muted);font-size:11px;line-height:1.5}
+
 .lobby-feedback{display:block;width:100%;margin-top:14px;padding:9px;border:1px solid #cfc8bb;background:transparent;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer}
 .lobby-feedback:hover{color:var(--ink);border-color:#b9b2a5}
 .room-field textarea{width:100%;min-height:120px;padding:10px 13px;border:1px solid #bdb5a8;background:#fffdf8;color:var(--ink);font:14px inherit;line-height:1.6;resize:vertical}

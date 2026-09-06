@@ -7,6 +7,25 @@ import { handleRoomRequest } from "../worker/rooms";
 
 type StoredRoom = Record<string, unknown> & { code: string; revision: number };
 
+function blankRoom(code: unknown, hostTokenHash: unknown, hostName: unknown, createdAt: unknown, updatedAt: unknown, expiresAt: unknown) {
+  return {
+    code, host_token_hash: hostTokenHash, guest_token_hash: null, host_name: hostName, guest_name: null,
+    side_choice: "random", host_side: null, host_formation: "귀마", guest_formation: "귀마",
+    augments: 1, host_ready: 0, guest_ready: 0,
+    status: "waiting", game_json: null, match_number: 0, action_started_at: null, revision: 0,
+    created_at: createdAt, updated_at: updatedAt, expires_at: expiresAt,
+    is_public: 0, host_accepted: 0, guest_accepted: 0, matched_at: null,
+  };
+}
+
+function update(db: MemoryD1, values: unknown[], codeIndex: number, revisionIndex: number, mutate: (row: StoredRoom) => void) {
+  const row = db.rooms.get(String(values[codeIndex]));
+  if (!row || row.revision !== values[revisionIndex]) return { meta: { changes: 0 } };
+  mutate(row);
+  row.revision += 1;
+  return { meta: { changes: 1 } };
+}
+
 class MemoryStatement {
   private values: unknown[] = [];
   constructor(private readonly db: MemoryD1, private readonly sql: string) {}
@@ -16,58 +35,92 @@ class MemoryStatement {
     const row = this.db.rooms.get(String(this.values[0]));
     return (row ? structuredClone(row) : null) as T | null;
   }
+  async all<T>() {
+    // 빠른 대국이 대기 중인 공개 방을 훑는 질의만 지원한다.
+    if (!this.sql.startsWith("SELECT * FROM rooms WHERE is_public = 1")) return { results: [] as T[] };
+    const since = Number(this.values[0]);
+    const results = [...this.db.rooms.values()]
+      .filter(row => row.is_public === 1 && row.status === "matching" && row.guest_token_hash === null && Number(row.updated_at) > since)
+      .sort((a, b) => Number(a.created_at) - Number(b.created_at))
+      .slice(0, 5)
+      .map(row => structuredClone(row));
+    return { results: results as T[] };
+  }
   async run() {
-    if (this.sql.startsWith("INSERT INTO rooms")) {
+    if (this.sql.startsWith("INSERT INTO rooms (code, host_token_hash, host_name, status, is_public")) {
       const [code, hostTokenHash, hostName, createdAt, updatedAt, expiresAt] = this.values;
       if (this.db.rooms.has(String(code))) throw new Error("duplicate room");
       this.db.rooms.set(String(code), {
-        code, host_token_hash: hostTokenHash, guest_token_hash: null, host_name: hostName, guest_name: null,
-        side_choice: "random", host_side: null, host_formation: "귀마", guest_formation: "귀마",
-        augments: 1, host_ready: 0, guest_ready: 0,
-        status: "waiting", game_json: null, match_number: 0, action_started_at: null, revision: 0,
-        created_at: createdAt, updated_at: updatedAt, expires_at: expiresAt,
+        ...blankRoom(code, hostTokenHash, hostName, createdAt, updatedAt, expiresAt),
+        status: "matching", is_public: 1,
       } as StoredRoom);
       return { meta: { changes: 1 } };
     }
-
-    const update = (codeIndex: number, revisionIndex: number, mutate: (row: StoredRoom) => void) => {
-      const code = String(this.values[codeIndex]);
-      const row = this.db.rooms.get(code);
-      if (!row || row.revision !== this.values[revisionIndex]) return { meta: { changes: 0 } };
-      mutate(row);
-      row.revision += 1;
+    if (this.sql.startsWith("INSERT INTO rooms")) {
+      const [code, hostTokenHash, hostName, createdAt, updatedAt, expiresAt] = this.values;
+      if (this.db.rooms.has(String(code))) throw new Error("duplicate room");
+      this.db.rooms.set(String(code), blankRoom(code, hostTokenHash, hostName, createdAt, updatedAt, expiresAt) as StoredRoom);
       return { meta: { changes: 1 } };
-    };
+    }
+    if (this.sql.startsWith("DELETE FROM rooms WHERE code = ? AND revision = ?")) {
+      const row = this.db.rooms.get(String(this.values[0]));
+      if (!row || row.revision !== this.values[1] || row.guest_token_hash !== null || row.status !== "matching") return { meta: { changes: 0 } };
+      this.db.rooms.delete(String(this.values[0]));
+      return { meta: { changes: 1 } };
+    }
+    if (this.sql.startsWith("DELETE FROM rooms WHERE code = ?")) {
+      const existed = this.db.rooms.delete(String(this.values[0]));
+      return { meta: { changes: existed ? 1 : 0 } };
+    }
+    if (this.sql.startsWith("DELETE FROM rooms")) return { meta: { changes: 0 } };
+    if (this.sql.startsWith("UPDATE rooms SET updated_at = ? WHERE code = ?")) {
+      const row = this.db.rooms.get(String(this.values[1]));
+      if (row) row.updated_at = this.values[0];
+      return { meta: { changes: row ? 1 : 0 } };
+    }
+    if (this.sql.startsWith("UPDATE rooms SET guest_token_hash = ?, guest_name = ?, matched_at")) return update(this.db, this.values, 5, 6, row => {
+      if (row.guest_token_hash !== null || row.status !== "matching") return;
+      [row.guest_token_hash, row.guest_name, row.matched_at, row.updated_at, row.expires_at] = this.values;
+    });
+    if (this.sql.startsWith("UPDATE rooms SET host_accepted") || this.sql.startsWith("UPDATE rooms SET guest_accepted")) return update(this.db, this.values, 2, 3, row => {
+      row[this.sql.includes("host_accepted") ? "host_accepted" : "guest_accepted"] = 1;
+      [row.updated_at, row.expires_at] = this.values;
+    });
+    if (this.sql.startsWith("UPDATE rooms SET status = 'waiting', matched_at")) return update(this.db, this.values, 3, 4, row => {
+      if (row.status !== "matching") return;
+      [row.matched_at, row.updated_at, row.expires_at] = this.values;
+      row.status = "waiting";
+    });
 
-    if (this.sql.startsWith("UPDATE rooms SET guest_token_hash")) return update(4, 5, row => {
+    if (this.sql.startsWith("UPDATE rooms SET guest_token_hash")) return update(this.db, this.values, 4, 5, row => {
       if (row.guest_token_hash !== null) return;
       [row.guest_token_hash, row.guest_name, row.updated_at, row.expires_at] = this.values;
       row.guest_ready = 0;
     });
-    if (this.sql.startsWith("UPDATE rooms SET side_choice")) return update(4, 5, row => {
+    if (this.sql.startsWith("UPDATE rooms SET side_choice")) return update(this.db, this.values, 4, 5, row => {
       [row.side_choice, row.augments, row.updated_at, row.expires_at] = this.values;
       row.host_ready = 0;
       row.guest_ready = 0;
     });
-    if (this.sql.startsWith("UPDATE rooms SET host_formation") || this.sql.startsWith("UPDATE rooms SET guest_formation")) return update(3, 4, row => {
+    if (this.sql.startsWith("UPDATE rooms SET host_formation") || this.sql.startsWith("UPDATE rooms SET guest_formation")) return update(this.db, this.values, 3, 4, row => {
       const host = this.sql.includes("host_formation");
       row[host ? "host_formation" : "guest_formation"] = this.values[0];
       row[host ? "host_ready" : "guest_ready"] = 0;
       [row.updated_at, row.expires_at] = this.values.slice(1, 3);
     });
-    if (this.sql.startsWith("UPDATE rooms SET host_ready") || this.sql.startsWith("UPDATE rooms SET guest_ready")) return update(3, 4, row => {
+    if (this.sql.startsWith("UPDATE rooms SET host_ready") || this.sql.startsWith("UPDATE rooms SET guest_ready")) return update(this.db, this.values, 3, 4, row => {
       row[this.sql.includes("host_ready") ? "host_ready" : "guest_ready"] = this.values[0];
       [row.updated_at, row.expires_at] = this.values.slice(1, 3);
     });
-    if (this.sql.startsWith("UPDATE rooms SET host_side")) return update(5, 6, row => {
+    if (this.sql.startsWith("UPDATE rooms SET host_side")) return update(this.db, this.values, 5, 6, row => {
       [row.host_side, row.game_json, row.action_started_at, row.updated_at, row.expires_at] = this.values;
       row.status = "playing";
       row.match_number = Number(row.match_number) + 1;
     });
-    if (this.sql.startsWith("UPDATE rooms SET game_json")) return update(5, 6, row => {
+    if (this.sql.startsWith("UPDATE rooms SET game_json")) return update(this.db, this.values, 5, 6, row => {
       [row.game_json, row.status, row.action_started_at, row.updated_at, row.expires_at] = this.values;
     });
-    if (this.sql.startsWith("UPDATE rooms SET status = 'waiting'")) return update(2, 3, row => {
+    if (this.sql.startsWith("UPDATE rooms SET status = 'waiting'")) return update(this.db, this.values, 2, 3, row => {
       [row.updated_at, row.expires_at] = this.values;
       row.status = "waiting";
       row.host_side = null;
@@ -83,6 +136,7 @@ class MemoryStatement {
 class MemoryD1 {
   rooms = new Map<string, StoredRoom>();
   prepare(sql: string) { return new MemoryStatement(this, sql); }
+  async batch(statements: MemoryStatement[]) { return Promise.all(statements.map(statement => statement.run())); }
 }
 
 async function api(db: MemoryD1, path: string, method = "GET", token?: string, payload?: unknown) {
@@ -191,4 +245,77 @@ test("each player picks their own formation and it reaches the started board", a
   const backRank = (side: Side, y: number) => [1, 2, 6, 7].map(x => game.pieces.find(piece => piece.side === side && piece.x === x && piece.y === y)!.type);
   assert.deepEqual(backRank("cho", 0), FORMATION_BACK_RANK["귀마"]);
   assert.deepEqual(backRank("han", 9), FORMATION_BACK_RANK["양귀마"]);
+});
+
+test("quick match pairs two players and needs both to accept before the lobby opens", async () => {
+  const db = new MemoryD1();
+  const firstResponse = await api(db, "/api/rooms/quick", "POST", undefined, { nickname: "먼저" });
+  assert.equal(firstResponse.status, 201);
+  const first = await firstResponse.json() as { token: string; room: RoomView };
+  assert.equal(first.room.status, "matching");
+  assert.equal(first.room.matched, false, "혼자 있을 때는 아직 매칭이 아니다");
+  assert.equal(first.room.isPublic, true);
+
+  // 두 번째 사람은 새 방을 만들지 않고 기다리던 방에 들어간다.
+  const secondResponse = await api(db, "/api/rooms/quick", "POST", undefined, { nickname: "나중" });
+  assert.equal(secondResponse.status, 200);
+  const second = await secondResponse.json() as { token: string; room: RoomView };
+  assert.equal(second.room.code, first.room.code, "대기 중인 방으로 이어진다");
+  assert.equal(second.room.viewerRole, "guest");
+  assert.equal(second.room.matched, true, "상대를 찾은 상태다");
+  assert.equal(db.rooms.size, 1, "방이 하나만 만들어진다");
+
+  // 진영 무작위·증강 사용은 고정이라 방장도 바꿀 수 없다.
+  const locked = await api(db, `/api/rooms/${first.room.code}/settings`, "PATCH", first.token, { sideChoice: "cho", augments: false });
+  assert.equal(locked.status, 409);
+
+  // 한쪽만 수락하면 대기실이 열리지 않는다.
+  const halfResponse = await api(db, `/api/rooms/${first.room.code}/accept`, "POST", first.token);
+  const half = await halfResponse.json() as { room: RoomView };
+  assert.equal(half.room.status, "matching", "한 명만 눌렀을 때는 아직 매칭 화면이다");
+  assert.deepEqual(half.room.accepted, { mine: true, theirs: false });
+
+  const openedResponse = await api(db, `/api/rooms/${first.room.code}/accept`, "POST", second.token);
+  const opened = await openedResponse.json() as { room: RoomView };
+  assert.equal(opened.room.status, "waiting", "양쪽이 누르면 대기실이 열린다");
+  assert.equal(opened.room.sideChoice, "random", "진영은 무작위로 고정된다");
+  assert.equal(opened.room.augments, true, "증강은 항상 켜져 있다");
+
+  // 대기실에서는 기존 흐름 그대로 포진을 고르고 준비하면 대국이 시작된다.
+  await api(db, `/api/rooms/${first.room.code}/ready`, "POST", first.token, { ready: true });
+  const startedResponse = await api(db, `/api/rooms/${first.room.code}/ready`, "POST", second.token, { ready: true });
+  const started = await startedResponse.json() as { room: RoomView };
+  assert.equal(started.room.status, "playing");
+});
+
+test("quick match keeps waiting players separate from friendly rooms", async () => {
+  const db = new MemoryD1();
+  // 친선전 방은 공개 대기열에 노출되지 않는다.
+  const friendly = await (await api(db, "/api/rooms", "POST", undefined, { nickname: "친선" })).json() as { token: string; room: RoomView };
+  assert.equal(friendly.room.isPublic, false);
+
+  const quick = await (await api(db, "/api/rooms/quick", "POST", undefined, { nickname: "빠른" })).json() as { token: string; room: RoomView };
+  assert.notEqual(quick.room.code, friendly.room.code, "친선전 방에는 매칭되지 않는다");
+  assert.equal(db.rooms.size, 2);
+
+  // 대기 중 취소하면 방이 사라져 다른 사람이 걸려들지 않는다.
+  const cancelled = await api(db, `/api/rooms/${quick.room.code}/cancel`, "POST", quick.token);
+  assert.equal(cancelled.status, 200);
+  assert.equal(db.rooms.has(quick.room.code), false, "대기열에서 방이 지워진다");
+  assert.equal(db.rooms.has(friendly.room.code), true, "친선전 방은 그대로 남는다");
+});
+
+test("declining a found match removes the room for both players", async () => {
+  const db = new MemoryD1();
+  const host = await (await api(db, "/api/rooms/quick", "POST", undefined, { nickname: "방장" })).json() as { token: string; room: RoomView };
+  const guest = await (await api(db, "/api/rooms/quick", "POST", undefined, { nickname: "참가자" })).json() as { token: string; room: RoomView };
+  assert.equal(guest.room.matched, true);
+
+  const declined = await api(db, `/api/rooms/${host.room.code}/cancel`, "POST", guest.token);
+  assert.equal(declined.status, 200);
+  assert.equal(db.rooms.size, 0, "거절하면 방이 접힌다");
+
+  // 남은 쪽의 폴링은 404를 받아 로비로 돌아간다.
+  const gone = await api(db, `/api/rooms/${host.room.code}`, "GET", host.token);
+  assert.equal(gone.status, 404);
 });

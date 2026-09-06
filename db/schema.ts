@@ -13,7 +13,13 @@ export const rooms = sqliteTable("rooms", {
   augments: integer("augments", { mode: "boolean" }).notNull().default(true),
   hostReady: integer("host_ready", { mode: "boolean" }).notNull().default(false),
   guestReady: integer("guest_ready", { mode: "boolean" }).notNull().default(false),
-  status: text("status", { enum: ["waiting", "playing", "finished"] }).notNull().default("waiting"),
+  status: text("status", { enum: ["matching", "waiting", "playing", "finished"] }).notNull().default("waiting"),
+  /** 빠른 대국으로 만들어져 아무나 매칭될 수 있는 방. 친선전 방은 항상 0이다. */
+  isPublic: integer("is_public", { mode: "boolean" }).notNull().default(false),
+  hostAccepted: integer("host_accepted", { mode: "boolean" }).notNull().default(false),
+  guestAccepted: integer("guest_accepted", { mode: "boolean" }).notNull().default(false),
+  /** 매칭이 성사된 시각. 수락 제한시간과 대기실 노쇼 정리의 기준이 된다. */
+  matchedAt: integer("matched_at"),
   gameJson: text("game_json"),
   matchNumber: integer("match_number").notNull().default(0),
   actionStartedAt: integer("action_started_at"),

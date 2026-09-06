@@ -18,8 +18,10 @@ test("server-renders the Augment Janggi pilot", async () => {
   assert.match(html, /로컬 2인 시작/);
   assert.match(html, /증강 테스트/);
   assert.match(html, /각종 증강들을 실험해 보세요/);
-  assert.match(html, /방 만들기/);
-  assert.match(html, /방 참여/);
+  assert.match(html, /빠른 대국/);
+  assert.match(html, /대기 중인 상대와 바로 붙습니다/);
+  assert.match(html, /친선전/);
+  assert.match(html, /방을 만들거나 코드로 입장합니다/);
   assert.match(html, /각자 10분/);
   assert.match(html, /착수마다 3초 추가/);
   assert.match(html, /증강 선택 60초/);
